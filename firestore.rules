@@ -1,0 +1,317 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      // User is an admin if their UID exists as a document in the 'admins' collection.
+      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    function isSupport() {
+      // User is a support agent if their UID exists as a document in the 'support' collection.
+      return exists(/databases/$(database)/documents/support/$(request.auth.uid));
+    }
+    
+    function isBidderUpdatingBidFields() {
+      // A user can update the item if they are placing a valid bid.
+      // This means they are not the owner, their bid is higher, and they are only updating bid-related fields.
+      // The client-side transaction updates currentBid, bidCount (via increment), and highestBidderId.
+      // We must allow exactly these three fields to be changed.
+      return isSignedIn() &&
+             resource.data.userId != request.auth.uid &&
+             request.resource.data.currentBid > resource.data.currentBid &&
+             request.resource.data.highestBidderId == request.auth.uid &&
+             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['currentBid', 'bidCount', 'highestBidderId']);
+    }
+
+    function isExtendingAuction() {
+      // The owner can extend their own auction by updating only the end date and extend count.
+      // The client transaction ensures they have enough tokens.
+      return isOwner(resource.data.userId) &&
+             request.resource.data.extendCount == resource.data.get('extendCount', 0) + 1 &&
+             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['auctionEndDate', 'extendCount']);
+    }
+    
+    function isBoostingListing() {
+      // A user can promote their own listing, changing isPromoted from false to true.
+      return isOwner(resource.data.userId) &&
+             request.resource.data.isPromoted == true &&
+             resource.data.get('isPromoted', false) == false &&
+             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isPromoted']);
+    }
+
+    // Collection Group Rules
+    match /{path=**}/bids/{bidId} {
+      // This rule allows any signed-in user to read any bid document from any 'bids' subcollection.
+      // This is required for features like the "Highest Bids Today" dashboard.
+      allow read: if isSignedIn();
+      
+      // A user can create a bid if the UID in the new bid document matches their own.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      
+      // Bids cannot be updated, but can be deleted by the owner or an admin.
+      allow update: if false;
+      allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
+    }
+
+    // Rules for the 'admins' collection
+    match /admins/{userId} {
+      // A user must be able to read their own document to check for admin status.
+      // Admins can read any admin document.
+      allow get: if isOwner(userId) || isAdmin();
+      
+      // Only admins can list all admins or write to the collection.
+      allow list, write: if isAdmin();
+    }
+    
+    // Rules for the 'support' collection
+    match /support/{userId} {
+      // Any signed in user can query the support collection to find an agent
+      allow read: if isSignedIn();
+      
+      // Only admins can add or remove support agents
+      allow write: if isAdmin();
+    }
+    
+    // Rules for user profiles and their subcollections
+    match /users/{userId} {
+      // Any signed-in user can view a public profile.
+      allow get: if isSignedIn();
+      // An admin can view all profiles
+      allow list: if isAdmin();
+      // A user can create their own profile.
+      allow create: if isOwner(userId);
+      // A user can update their profile, but not change their UID or email. Admin can update anything.
+      // Users can update their own tokens via transactions.
+      allow update: if isOwner(userId) || isAdmin();
+
+      // Rules for the 'watchlist' subcollection
+      match /watchlist/{itemId} {
+        // A user can read, create, update, or delete items in their own watchlist.
+        allow read, write, delete: if isOwner(userId);
+      }
+      
+      match /bidsOnItems/{itemId} {
+        allow read, write: if isOwner(userId);
+        
+        match /myBids/{bidId} {
+            allow read, write: if isOwner(userId);
+        }
+      }
+
+      // Rules for the 'notifications' subcollection
+      match /notifications/{notificationId} {
+        // A user can read, update, and delete their own notifications.
+        allow read, update, delete: if isOwner(userId);
+        // Any authenticated user can create a notification for another user (e.g., for outbids).
+        allow create: if isSignedIn();
+      }
+
+      // Rules for a user's copy of their support tickets
+      match /supportTickets/{ticketId} {
+        // A user can read their own tickets.
+        allow read, list: if isOwner(userId);
+        
+        // Batch write from server handles creation/updates, but client-side needs this.
+        allow create, update: if isOwner(userId);
+      }
+    }
+    
+    // Rules for the 'leaderboard' collection
+    match /leaderboard/{userId} {
+      // Anyone signed in can view the leaderboard.
+      allow read: if isSignedIn();
+      
+      // Any signed in user can write to the leaderboard (scores are updated via transaction).
+      // The user can be the bidder or the seller.
+      allow write: if isSignedIn();
+    }
+
+    // Rules for the 'alcohol' collection
+    match /alcohol/{alcoholId} {
+      // Anyone can view the alcohol items that are for auction.
+      allow get, list: if true;
+
+      // Any signed in user can create a listing.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+
+      // The owner or an admin can update/delete. Bidders can update bid fields.
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing();
+      allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
+
+      match /watchers/{userId} {
+        allow read: if isSignedIn();
+        allow write, delete: if isOwner(userId);
+      }
+    }
+
+    // Rules for the 'casuals' collection
+    match /casuals/{casualId} {
+      // Anyone can view the items that are for auction.
+      allow get, list: if true;
+
+      // Any signed in user can create a listing.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+
+      // The owner or an admin can update/delete. Bidders can update bid fields.
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing();
+      allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
+      
+      match /watchers/{userId} {
+        allow read: if isSignedIn();
+        allow write, delete: if isOwner(userId);
+      }
+    }
+
+    // Rules for the 'iconics' collection
+    match /iconics/{iconicId} {
+      // Anyone can view the items that are for auction.
+      allow get, list: if true;
+
+      // Any signed in user can create a listing.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+
+      // The owner or an admin can update/delete. Bidders can update bid fields.
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing();
+      allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
+      
+      match /watchers/{userId} {
+        allow read: if isSignedIn();
+        allow write, delete: if isOwner(userId);
+      }
+    }
+
+    // Rules for the 'art' collection
+    match /art/{artId} {
+      // Anyone can view the items that are for auction.
+      allow get, list: if true;
+
+      // Any signed in user can create a listing.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+
+      // The owner or an admin can update/delete. Bidders can update bid fields.
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing();
+      allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
+      
+      match /watchers/{userId} {
+        allow read: if isSignedIn();
+        allow write, delete: if isOwner(userId);
+      }
+    }
+    
+    // Rules for the 'plates' collection
+    match /plates/{plateId} {
+      // Anyone can view the items that are for auction.
+      allow get, list: if true;
+
+      // Any signed in user can create a listing.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+
+      // The owner or an admin can update/delete. Bidders can update bid fields.
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing();
+      allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
+      
+      match /watchers/{userId} {
+        allow read: if isSignedIn();
+        allow write, delete: if isOwner(userId);
+      }
+    }
+
+    // Rules for the 'phoneNumbers' collection
+    match /phoneNumbers/{phoneNumberId} {
+      // Anyone can view the items that are for auction.
+      allow get, list: if true;
+
+      // Any signed in user can create a listing.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+
+      // The owner or an admin can update/delete. Bidders can update bid fields.
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing();
+      allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
+      
+      match /watchers/{userId} {
+        allow read: if isSignedIn();
+        allow write, delete: if isOwner(userId);
+      }
+    }
+    
+    // Rules for the 'apparels' collection
+    match /apparels/{apparelId} {
+      // Anyone can view the items that are for auction.
+      allow get, list: if true;
+
+      // Any signed in user can create a listing.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+
+      // The owner or an admin can update/delete. Bidders can update bid fields.
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing();
+      allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
+      
+      match /watchers/{userId} {
+        allow read: if isSignedIn();
+        allow write, delete: if isOwner(userId);
+      }
+    }
+
+    // Rules for the root 'supportTickets' collection
+    match /supportTickets/{ticketId} {
+      // Any signed in user can create a ticket. The user ID must match their own.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      
+      // Support agents and admins can list and read all tickets.
+      allow read: if isSupport() || isAdmin();
+      
+      // Support agents and admins can update tickets (e.g., to close them).
+      allow update: if isSupport() || isAdmin();
+      
+      // No one can delete tickets from the root collection.
+      allow delete: if false;
+    }
+
+    // Rules for user interactions (for recommendations)
+    match /userInteractions/{interactionId} {
+      // A user can log their own interactions.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      // This data is for backend processing and should not be readable or mutable by clients.
+      allow read, update, delete: if false;
+    }
+
+     // Rules for the 'chats' collection
+    match /chats/{chatId} {
+      // A user can read a chat they are a participant in, and so can an admin.
+      allow read: if request.auth.uid in resource.data.participants || isAdmin();
+      
+      // Allow users to query for chats they are a part of.
+      // The read rule above will secure the results of the query.
+      allow list: if isSignedIn();
+      
+      // Allow creation of chats if the current user is a participant.
+      allow create: if isSignedIn() && request.auth.uid in request.resource.data.participants;
+
+      // Allow participants to update only the `lastMessage` and `readBy` fields.
+      allow update: if request.auth.uid in resource.data.participants
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'readBy']);
+
+      match /messages/{messageId} {
+        // Messages can be listed by participants or admins.
+        allow list: if (isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants) || isAdmin();
+        // A participant can create a message.
+        allow create: if isSignedIn() 
+                      && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants
+                      && request.resource.data.senderId == request.auth.uid;
+        // No one can update or delete messages.
+        allow update, delete: if false;
+      }
+    }
+  }
+}

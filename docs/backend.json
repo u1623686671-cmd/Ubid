@@ -1,0 +1,802 @@
+
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "type": "object",
+      "description": "Represents a user's profile information, created on sign-up.",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's unique authentication ID." },
+        "displayName": { "type": "string", "description": "The user's full display name (first and last name)." },
+        "firstName": { "type": "string", "description": "The user's first name." },
+        "lastName": { "type": "string", "description": "The user's last name." },
+        "email": { "type": "string", "description": "The user's email address.", "format": "email" },
+        "photoURL": { "type": "string", "description": "URL of the user's profile picture.", "format": "uri" },
+        "bio": { "type": "string", "description": "A short user bio." },
+        "phoneNumber": { "type": "string", "description": "The user's phone number." },
+        "lastListingTimestamp": { "type": "string", "format": "date-time", "description": "Timestamp of the user's last auction listing." },
+        "isPlusUser": { "type": "boolean", "description": "Indicates if the user has a Plus subscription." },
+        "isUltimateUser": { "type": "boolean", "description": "Indicates if the user has an Ultimate subscription." },
+        "subscriptionBillingCycle": { "type": "string", "enum": ["monthly", "yearly"], "description": "The active billing cycle for the user's subscription." },
+        "subscriptionRenewalDate": { "type": "string", "format": "date-time", "description": "The date the user's current subscription term renews." },
+        "extendTokens": { "type": "number", "description": "The number of auction extend tokens the user owns." },
+        "promotionTokens": { "type": "number", "description": "The number of free listing promotion tokens the user owns." },
+        "pendingSubscriptionPlan": { "type": "string", "enum": ["plus", "ultimate"], "description": "The plan scheduled to start at the next renewal." },
+        "pendingSubscriptionBillingCycle": { "type": "string", "enum": ["monthly", "yearly"], "description": "The billing cycle for the pending subscription." },
+        "pendingSubscriptionEffectiveDate": { "type": "string", "format": "date-time", "description": "The date the pending subscription will become active." }
+      },
+      "required": ["uid", "displayName", "firstName", "lastName", "email"]
+    },
+    "UserInteraction": {
+      "title": "User Interaction",
+      "type": "object",
+      "description": "Records a user's interaction with an item, such as a view.",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user." },
+        "itemId": { "type": "string", "description": "The ID of the item interacted with." },
+        "category": { "type": "string", "description": "The category of the item." },
+        "interactionType": { "type": "string", "enum": ["view"], "description": "The type of interaction." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the interaction occurred." }
+      },
+      "required": ["userId", "itemId", "category", "interactionType", "timestamp"]
+    },
+    "UserScore": {
+      "title": "User Score",
+      "type": "object",
+      "description": "Represents a user's score and rank in the leaderboard.",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's unique ID." },
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "photoURL": { "type": "string", "format": "uri", "description": "URL of the user's profile picture." },
+        "score": { "type": "number", "description": "The user's total score." },
+        "lastUpdated": { "type": "string", "format": "date-time", "description": "Timestamp of the last score update." }
+      },
+      "required": ["uid", "displayName", "score", "lastUpdated"]
+    },
+    "Watcher": {
+      "title": "Watcher",
+      "type": "object",
+      "description": "Represents a user currently viewing an auction item in real-time.",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the user."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the user started watching."
+        }
+      },
+      "required": ["displayName", "timestamp"]
+    },
+    "WatchlistItem": {
+      "title": "Watchlist Item",
+      "type": "object",
+      "description": "A denormalized copy of an auction item a user is watching.",
+      "properties": {
+        "itemId": { "type": "string", "description": "The ID of the watched item." },
+        "category": { "type": "string", "description": "The category of the watched item (e.g., 'alcohol', 'art')." },
+        "title": { "type": "string", "description": "The title or name of the item." },
+        "imageUrl": { "type": "string", "description": "URL of the item's image.", "format": "uri" },
+        "auctionStartDate": { "type": "string", "format": "date-time", "description": "When the auction for the item starts." },
+        "auctionEndDate": { "type": "string", "format": "date-time", "description": "When the auction for the item ends." },
+        "addedAt": { "type": "string", "format": "date-time", "description": "Timestamp when the item was added to the watchlist." }
+      },
+      "required": ["itemId", "category", "title", "imageUrl", "auctionStartDate", "auctionEndDate", "addedAt"]
+    },
+    "Alcohol": {
+      "title": "Alcohol",
+      "type": "object",
+      "description": "Represents a specific alcohol item listed for auction.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who listed the alcohol item."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the alcohol bottle."
+        },
+        "subcategory": {
+            "type": "string",
+            "description": "The sub-category of the alcohol.",
+            "enum": ["Whiskey", "Wine", "Rum", "Tequila", "Gin", "Vodka", "Liqueur", "Other"]
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the alcohol item."
+        },
+        "imageUrls": {
+          "type": "array",
+          "description": "URLs of the item's images (up to 4).",
+          "items": { "type": "string", "format": "uri" },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "age": {
+          "type": "number",
+          "description": "The age of the alcohol in years. 0 indicates no age statement."
+        },
+        "startingBid": {
+          "type": "number",
+          "description": "The starting bid price for the alcohol item."
+        },
+        "currentBid": { "type": "number", "description": "The current highest bid price." },
+        "highestBidderId": {
+          "type": "string",
+          "description": "The UID of the current highest bidder."
+        },
+        "bidCount": { "type": "number", "description": "The total number of bids placed." },
+        "minimumBidIncrement": {
+          "type": "number",
+          "description": "The minimum increment for bids."
+        },
+        "auctionStartDate": {
+          "type": "string",
+          "description": "The date and time when the auction starts.",
+          "format": "date-time"
+        },
+        "auctionEndDate": {
+          "type": "string",
+          "description": "The date and time when the auction ends.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the auction.",
+          "enum": ["upcoming", "live", "completed"]
+        },
+        "isFlashAuction": {
+          "type": "boolean",
+          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+        },
+        "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
+        "winnerId": {
+          "type": "string",
+          "description": "The UID of the winning bidder after the auction is completed."
+        },
+        "extendCount": { "type": "number", "description": "How many times the auction has been extended." }
+      },
+      "required": [
+        "userId",
+        "name",
+        "subcategory",
+        "description",
+        "imageUrls",
+        "age",
+        "startingBid",
+        "currentBid",
+        "bidCount",
+        "minimumBidIncrement",
+        "auctionStartDate",
+        "auctionEndDate",
+        "status"
+      ]
+    },
+    "Admin": {
+      "title": "Admin",
+      "type": "object",
+      "description": "An empty object signifying admin privileges. The document ID is the user's UID."
+    },
+    "Support": {
+      "title": "Support",
+      "type": "object",
+      "description": "An empty object signifying support agent privileges. The document ID is the user's UID."
+    },
+    "Casual": {
+      "title": "Casual",
+      "type": "object",
+      "description": "Represents a casual item listed for auction.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who listed the item."
+        },
+        "itemName": {
+          "type": "string",
+          "description": "The name of the item."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the item."
+        },
+        "imageUrls": {
+          "type": "array",
+          "description": "URLs of the item's images (up to 4).",
+          "items": { "type": "string", "format": "uri" },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "startingBid": {
+          "type": "number"
+        },
+        "currentBid": { "type": "number", "description": "The current highest bid price." },
+        "highestBidderId": {
+          "type": "string",
+          "description": "The UID of the current highest bidder."
+        },
+        "bidCount": { "type": "number", "description": "The total number of bids placed." },
+        "minimumBidIncrement": {
+          "type": "number"
+        },
+        "auctionStartDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "auctionEndDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["upcoming", "live", "completed"]
+        },
+        "isFlashAuction": {
+          "type": "boolean",
+          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+        },
+        "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
+        "winnerId": {
+          "type": "string",
+          "description": "The UID of the winning bidder after the auction is completed."
+        },
+        "extendCount": { "type": "number", "description": "How many times the auction has been extended." }
+      },
+      "required": [
+        "userId",
+        "itemName",
+        "description",
+        "imageUrls",
+        "startingBid",
+        "currentBid",
+        "bidCount",
+        "minimumBidIncrement",
+        "auctionStartDate",
+        "auctionEndDate",
+        "status"
+      ]
+    },
+    "Iconic": {
+      "title": "Iconic",
+      "type": "object",
+      "description": "Represents a personal item from a celebrity listed for auction.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user (celebrity's representative) who listed the item."
+        },
+        "itemName": {
+          "type": "string",
+          "description": "The name of the iconic item."
+        },
+        "category": {
+          "type": "string",
+          "description": "The name of the celebrity selling the item."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the item and its significance."
+        },
+        "imageUrls": {
+          "type": "array",
+          "description": "URLs of the item's images (up to 4).",
+          "items": { "type": "string", "format": "uri" },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "startingBid": { "type": "number" },
+        "currentBid": { "type": "number" },
+        "highestBidderId": { "type": "string" },
+        "bidCount": { "type": "number" },
+        "minimumBidIncrement": { "type": "number" },
+        "auctionStartDate": { "type": "string", "format": "date-time" },
+        "auctionEndDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["upcoming", "live", "completed"] },
+        "isFlashAuction": {
+          "type": "boolean",
+          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+        },
+        "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
+        "winnerId": { "type": "string" },
+        "extendCount": { "type": "number", "description": "How many times the auction has been extended." }
+      },
+      "required": [
+        "userId",
+        "itemName",
+        "category",
+        "description",
+        "imageUrls",
+        "startingBid",
+        "currentBid",
+        "bidCount",
+        "minimumBidIncrement",
+        "auctionStartDate",
+        "auctionEndDate",
+        "status"
+      ]
+    },
+    "Art": {
+      "title": "Art",
+      "type": "object",
+      "description": "Represents a piece of art listed for auction.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who listed the item."
+        },
+        "itemName": {
+          "type": "string",
+          "description": "The title of the artwork."
+        },
+        "category": {
+          "type": "string",
+          "description": "The name of the artist."
+        },
+        "subcategory": {
+            "type": "string",
+            "description": "The type of art.",
+            "enum": ["Painting", "Sculpture", "Photography", "Print", "Drawing", "Digital Art", "Other"]
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed story behind the artwork, its meaning, and history."
+        },
+        "imageUrls": {
+          "type": "array",
+          "description": "URLs of the item's images (up to 4).",
+          "items": { "type": "string", "format": "uri" },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "startingBid": {
+          "type": "number"
+        },
+        "currentBid": { "type": "number", "description": "The current highest bid price." },
+        "highestBidderId": {
+          "type": "string",
+          "description": "The UID of the current highest bidder."
+        },
+        "bidCount": { "type": "number", "description": "The total number of bids placed." },
+        "minimumBidIncrement": {
+          "type": "number"
+        },
+        "auctionStartDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "auctionEndDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["upcoming", "live", "completed"]
+        },
+        "isFlashAuction": {
+          "type": "boolean",
+          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+        },
+        "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
+        "winnerId": {
+          "type": "string",
+          "description": "The UID of the winning bidder after the auction is completed."
+        },
+        "extendCount": { "type": "number", "description": "How many times the auction has been extended." }
+      },
+      "required": [
+        "userId",
+        "itemName",
+        "category",
+        "subcategory",
+        "description",
+        "imageUrls",
+        "startingBid",
+        "currentBid",
+        "bidCount",
+        "minimumBidIncrement",
+        "auctionStartDate",
+        "auctionEndDate",
+        "status"
+      ]
+    },
+    "Plate": {
+      "title": "Plate",
+      "type": "object",
+      "description": "Represents a car plate number listed for auction.",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user who listed the item." },
+        "itemName": { "type": "string", "description": "The plate number." },
+        "category": { "type": "string", "description": "The region or country of the plate." },
+        "startingBid": { "type": "number" },
+        "currentBid": { "type": "number" },
+        "highestBidderId": { "type": "string" },
+        "bidCount": { "type": "number" },
+        "minimumBidIncrement": { "type": "number" },
+        "auctionStartDate": { "type": "string", "format": "date-time" },
+        "auctionEndDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["upcoming", "live", "completed"] },
+        "isFlashAuction": {
+          "type": "boolean",
+          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+        },
+        "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
+        "winnerId": { "type": "string" },
+        "extendCount": { "type": "number", "description": "How many times the auction has been extended." }
+      },
+      "required": ["userId", "itemName", "category", "startingBid", "currentBid", "bidCount", "minimumBidIncrement", "auctionStartDate", "auctionEndDate", "status"]
+    },
+    "PhoneNumber": {
+      "title": "Phone Number",
+      "type": "object",
+      "description": "Represents a unique phone number listed for auction.",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user who listed the item." },
+        "itemName": { "type": "string", "description": "The phone number." },
+        "category": { "type": "string", "description": "The provider or country of the phone number." },
+        "startingBid": { "type": "number" },
+        "currentBid": { "type": "number" },
+        "highestBidderId": { "type": "string" },
+        "bidCount": { "type": "number" },
+        "minimumBidIncrement": { "type": "number" },
+        "auctionStartDate": { "type": "string", "format": "date-time" },
+        "auctionEndDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["upcoming", "live", "completed"] },
+        "isFlashAuction": {
+          "type": "boolean",
+          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+        },
+        "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
+        "winnerId": { "type": "string" },
+        "extendCount": { "type": "number", "description": "How many times the auction has been extended." }
+      },
+      "required": ["userId", "itemName", "category", "startingBid", "currentBid", "bidCount", "minimumBidIncrement", "auctionStartDate", "auctionEndDate", "status"]
+    },
+    "Apparel": {
+      "title": "Apparel",
+      "type": "object",
+      "description": "Represents an apparel item listed for auction.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who listed the item."
+        },
+        "itemName": {
+          "type": "string",
+          "description": "The name of the apparel item."
+        },
+        "category": {
+          "type": "string",
+          "description": "The sub-category of the apparel item.",
+          "enum": ["Tops", "Bottoms", "Outerwear", "Dresses", "Shoes", "Accessories"]
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the item."
+        },
+        "imageUrls": {
+          "type": "array",
+          "description": "URLs of the item's images (up to 4).",
+          "items": { "type": "string", "format": "uri" },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "startingBid": { "type": "number" },
+        "currentBid": { "type": "number" },
+        "highestBidderId": { "type": "string" },
+        "bidCount": { "type": "number" },
+        "minimumBidIncrement": { "type": "number" },
+        "auctionStartDate": { "type": "string", "format": "date-time" },
+        "auctionEndDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["upcoming", "live", "completed"] },
+        "isFlashAuction": {
+          "type": "boolean",
+          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+        },
+        "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
+        "winnerId": { "type": "string" },
+        "extendCount": { "type": "number", "description": "How many times the auction has been extended." }
+      },
+      "required": [
+        "userId",
+        "itemName",
+        "category",
+        "description",
+        "imageUrls",
+        "startingBid",
+        "currentBid",
+        "bidCount",
+        "minimumBidIncrement",
+        "auctionStartDate",
+        "auctionEndDate",
+        "status"
+      ]
+    },
+    "Bid": {
+      "title": "Bid",
+      "type": "object",
+      "description": "Represents a single bid placed on an auction item.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who placed the bid."
+        },
+        "bidderName": {
+          "type": "string",
+          "description": "The display name of the bidder at the time of the bid."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the bid."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the bid was placed."
+        }
+      },
+      "required": [
+        "userId",
+        "bidderName",
+        "amount",
+        "timestamp"
+      ]
+    },
+    "BidsOnItem": {
+      "title": "Bids on Item",
+      "description": "A record of an item a user has bid on, tracking their bids.",
+      "type": "object",
+      "properties": {
+        "itemId": { "type": "string" },
+        "category": { "type": "string" },
+        "itemTitle": { "type": "string" },
+        "itemImageUrl": { "type": "string", "format": "uri" },
+        "itemAuctionEndDate": { "type": "string", "format": "date-time" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["itemId", "category", "itemTitle", "itemImageUrl", "itemAuctionEndDate", "lastUpdated"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "type": "object",
+      "description": "Represents a private conversation, either between a seller and a winning bidder, or a user and support.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The type of chat conversation.",
+          "enum": ["item", "support"]
+        },
+        "participants": {
+          "type": "array",
+          "description": "An array containing the UIDs of the chat participants.",
+          "items": { "type": "string" }
+        },
+        "participantInfo": {
+          "type": "object",
+          "description": "Denormalized info about participants, keyed by UID.",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "displayName": { "type": "string" },
+              "photoURL": { "type": "string", "format": "uri" }
+            }
+          }
+        },
+        "itemId": { "type": "string", "description": "The ID of the item, if this is an item-related chat." },
+        "itemCategory": { "type": "string", "description": "The category of the item, if applicable." },
+        "itemTitle": { "type": "string", "description": "The title of the item, if applicable." },
+        "itemImageUrl": { "type": "string", "format": "uri", "description": "The image URL of the item, if applicable." },
+        "lastMessage": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" },
+            "timestamp": { "type": "string", "format": "date-time" },
+            "senderId": { "type": "string" }
+          }
+        },
+        "readBy": {
+          "type": "array",
+          "description": "An array containing the UIDs of participants who have read the last message.",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["type", "participants", "participantInfo"]
+    },
+    "Message": {
+      "title": "Message",
+      "type": "object",
+      "description": "A single message within a chat conversation.",
+      "properties": {
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderId", "text", "timestamp"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "type": "object",
+      "description": "Represents a user notification for events like new messages, bids, or auction status changes.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The type of notification.",
+          "enum": ["new_message", "outbid", "auction_started", "auction_ending_soon", "auction_ended", "auction_won"]
+        },
+        "title": { "type": "string", "description": "The main title of the notification." },
+        "body": { "type": "string", "description": "The detailed content of the notification." },
+        "link": { "type": "string", "format": "uri", "description": "A URL to navigate to when the notification is clicked." },
+        "isRead": { "type": "boolean", "description": "Whether the user has read the notification. Defaults to false." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the notification was created." }
+      },
+      "required": ["type", "title", "body", "link", "isRead", "timestamp"]
+    },
+    "SupportTicket": {
+      "title": "Support Ticket",
+      "type": "object",
+      "description": "Represents a support request created by a user.",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user who created the ticket." },
+        "userName": { "type": "string", "description": "The name of the user at the time of creation." },
+        "userEmail": { "type": "string", "format": "email" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "chatId": { "type": "string", "description": "The ID of the chat created when this ticket is handled." }
+      },
+      "required": ["userId", "userName", "userEmail", "subject", "message", "status", "createdAt"]
+    }
+  },
+  "auth": {
+    "providers": ["password", "google.com"]
+  },
+  "firestore": {
+    "/leaderboard/{userId}": {
+      "schema": { "$ref": "#/entities/UserScore" },
+      "description": "Stores user scores for the Hall of Fame leaderboard. The document ID {userId} must match the user's authentication UID."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stores user profile information. The document ID {userId} must match the user's authentication UID."
+    },
+    "/users/{userId}/watchlist/{itemId}": {
+      "schema": { "$ref": "#/entities/WatchlistItem" },
+      "description": "Stores items a user is watching. The document ID {itemId} is the ID of the item in its respective collection."
+    },
+    "/users/{userId}/bidsOnItems/{itemId}": {
+      "schema": { "$ref": "#/entities/BidsOnItem" },
+      "description": "An item the user has placed a bid on."
+    },
+    "/users/{userId}/bidsOnItems/{itemId}/myBids/{bidId}": {
+      "schema": {
+        "title": "User's Bid on Item",
+        "type": "object",
+        "properties": {
+            "amount": { "type": "number" },
+            "timestamp": { "type": "string", "format": "date-time" }
+        },
+        "required": ["amount", "timestamp"]
+      },
+      "description": "A specific bid a user placed on an item."
+    },
+    "/users/{userId}/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "A user's private notification sub-collection."
+    },
+     "/users/{userId}/supportTickets/{ticketId}": {
+      "schema": { "$ref": "#/entities/SupportTicket" },
+      "description": "A user's private copy of their submitted support tickets."
+    },
+    "/alcohol/{alcoholId}": {
+      "schema": { "$ref": "#/entities/Alcohol" },
+      "description": "Stores all alcohol auction listings. Each document contains a userId field to link it back to the owning user."
+    },
+    "/alcohol/{alcoholId}/bids/{bidId}": {
+      "schema": { "$ref": "#/entities/Bid" },
+      "description": "Bids for an alcohol item."
+    },
+    "/alcohol/{alcoholId}/watchers/{userId}": {
+      "schema": { "$ref": "#/entities/Watcher" },
+      "description": "A list of users currently viewing this alcohol item."
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Stores a list of admin user UIDs. The existence of a document with the user's UID as the document ID indicates admin privileges."
+    },
+    "/support/{userId}": {
+      "schema": { "$ref": "#/entities/Support" },
+      "description": "Stores a list of support agent user UIDs. The existence of a document with the user's UID as the document ID indicates support privileges."
+    },
+    "/supportTickets/{ticketId}": {
+      "schema": { "$ref": "#/entities/SupportTicket" },
+      "description": "A root collection of all support tickets for agents to view and handle."
+    },
+    "/casuals/{casualId}": {
+      "schema": {
+        "$ref": "#/entities/Casual"
+      },
+      "description": "Stores all casual item auction listings."
+    },
+    "/casuals/{casualId}/bids/{bidId}": {
+      "schema": { "$ref": "#/entities/Bid" },
+      "description": "Bids for a casual item."
+    },
+    "/casuals/{casualId}/watchers/{userId}": {
+      "schema": { "$ref": "#/entities/Watcher" },
+      "description": "A list of users currently viewing this casual item."
+    },
+    "/iconics/{iconicId}": {
+      "schema": { "$ref": "#/entities/Iconic" },
+      "description": "Stores all iconic celebrity item auction listings."
+    },
+    "/iconics/{iconicId}/bids/{bidId}": {
+      "schema": { "$ref": "#/entities/Bid" },
+      "description": "Bids for an iconic item."
+    },
+    "/iconics/{iconicId}/watchers/{userId}": {
+      "schema": { "$ref": "#/entities/Watcher" },
+      "description": "A list of users currently viewing this iconic item."
+    },
+    "/art/{artId}": {
+      "schema": { "$ref": "#/entities/Art" },
+      "description": "Stores all art auction listings."
+    },
+    "/art/{artId}/bids/{bidId}": {
+      "schema": { "$ref": "#/entities/Bid" },
+      "description": "Bids for an art item."
+    },
+    "/art/{artId}/watchers/{userId}": {
+      "schema": { "$ref": "#/entities/Watcher" },
+      "description": "A list of users currently viewing this art item."
+    },
+    "/plates/{plateId}": {
+      "schema": { "$ref": "#/entities/Plate" },
+      "description": "Stores all car plate number auction listings."
+    },
+    "/plates/{plateId}/bids/{bidId}": {
+      "schema": { "$ref": "#/entities/Bid" },
+      "description": "Bids for a plate item."
+    },
+    "/plates/{plateId}/watchers/{userId}": {
+      "schema": { "$ref": "#/entities/Watcher" },
+      "description": "A list of users currently viewing this plate item."
+    },
+    "/phoneNumbers/{phoneNumberId}": {
+      "schema": { "$ref": "#/entities/PhoneNumber" },
+      "description": "Stores all phone number auction listings."
+    },
+    "/phoneNumbers/{phoneNumberId}/bids/{bidId}": {
+      "schema": { "$ref": "#/entities/Bid" },
+      "description": "Bids for a phone number item."
+    },
+    "/phoneNumbers/{phoneNumberId}/watchers/{userId}": {
+      "schema": { "$ref": "#/entities/Watcher" },
+      "description": "A list of users currently viewing this phone number item."
+    },
+    "/apparels/{apparelId}": {
+      "schema": { "$ref": "#/entities/Apparel" },
+      "description": "Stores all apparel auction listings."
+    },
+    "/apparels/{apparelId}/bids/{bidId}": {
+      "schema": { "$ref": "#/entities/Bid" },
+      "description": "Bids for an apparel item."
+    },
+    "/apparels/{apparelId}/watchers/{userId}": {
+      "schema": { "$ref": "#/entities/Watcher" },
+      "description": "A list of users currently viewing this apparel item."
+    },
+    "/chats/{chatId}": {
+      "schema": { "$ref": "#/entities/Chat" },
+      "description": "Stores chat conversations between sellers and winners, or users and support."
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Stores the messages for a specific chat."
+    },
+    "/userInteractions/{interactionId}": {
+      "schema": { "$ref": "#/entities/UserInteraction" },
+      "description": "Stores records of user interactions with items, used for analytics and recommendations."
+    }
+  }
+}
