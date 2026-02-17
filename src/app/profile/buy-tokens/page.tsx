@@ -40,10 +40,10 @@ export default function BuyTokensPage() {
     }, [isUserLoading, user, router]);
 
     const handlePurchase = async () => {
-        if (!user) return;
+        if (!user || !user.email) return;
         setIsSubmitting(true);
         try {
-            await createOneTimeCheckoutSession('token', quantity);
+            await createOneTimeCheckoutSession(user.uid, user.email, 'token', quantity);
             // User will be redirected to Stripe by the server action.
             // On success, they land on the dashboard. On cancel, they return here.
         } catch (error: any) {

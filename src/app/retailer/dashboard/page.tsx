@@ -253,7 +253,7 @@ export default function MyListingsPage() {
     }
     
     const handleBoostListing = async (listing: AnyListing) => {
-        if (!user || !firestore || !userProfile) return;
+        if (!user || !user.email || !userProfile) return;
         setBoostingItemId(listing.id);
 
         const userRef = doc(firestore, 'users', user.uid);
@@ -279,7 +279,7 @@ export default function MyListingsPage() {
                     description: `"${getListingTitle(listing)}" is now promoted using a free token.`,
                 });
             } else {
-                await createOneTimeCheckoutSession('boost', 1, { itemId: listing.id, itemCategory: listing.category });
+                await createOneTimeCheckoutSession(user.uid, user.email, 'boost', 1, { itemId: listing.id, itemCategory: listing.category });
             }
         } catch (e: any) {
             toast({

@@ -2,8 +2,6 @@
 'use server';
 
 import { stripe } from '@/lib/stripe';
-import { auth } from '@/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/server-init';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -35,14 +33,14 @@ const BOOST_PRICE_ID = process.env.STRIPE_BOOST_PRICE_ID!; // A one-time price f
 
 
 async function getOrCreateStripeCustomerId(userId: string, email: string): Promise<string> {
-    const userRef = doc(db, 'users', userId);
-    const userSnap = await getDoc(userRef);
+    const userRef = db.collection('users').doc(userId);
+    const userSnap = await userRef.get();
 
-    if (!userSnap.exists()) {
+    if (!userSnap.exists) {
         throw new Error("User profile not found.");
     }
 
-    const userData = userSnap.data();
+    const userData = userSnap.data()!;
     if (userData.stripeCustomerId) {
         return userData.stripeCustomerId;
     }
@@ -57,7 +55,7 @@ async function getOrCreateStripeCustomerId(userId: string, email: string): Promi
     });
 
     // Save the new Stripe customer ID to the user's profile in Firestore
-    await updateDoc(userRef, {
+    await userRef.update({
         stripeCustomerId: customer.id,
     });
 
@@ -66,13 +64,11 @@ async function getOrCreateStripeCustomerId(userId: string, email: string): Promi
 
 
 export async function createCheckoutSession(
+    userId: string,
+    email: string,
     plan: 'plus' | 'ultimate',
     billingCycle: 'monthly' | 'yearly'
 ): Promise<void> {
-    const user = auth.currentUser;
-    if (!user) {
-        return redirect('/login');
-    }
 
     const priceId = SUBSCRIPTION_PRICE_IDS[plan][billingCycle];
 
@@ -80,7 +76,7 @@ export async function createCheckoutSession(
         throw new Error('Stripe subscription price IDs are not configured correctly in your environment variables.');
     }
 
-    const customerId = await getOrCreateStripeCustomerId(user.uid, user.email!);
+    const customerId = await getOrCreateStripeCustomerId(userId, email);
 
     const checkoutSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -93,7 +89,7 @@ export async function createCheckoutSession(
         success_url: `${process.env.NEXT_PUBLIC_URL}/profile/subscription?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.NEXT_PUBLIC_URL}/profile/subscription`,
         metadata: {
-            firebaseUID: user.uid,
+            firebaseUID: userId,
         }
     });
 
@@ -105,14 +101,12 @@ export async function createCheckoutSession(
 }
 
 export async function createOneTimeCheckoutSession(
+    userId: string,
+    email: string,
     product: 'token' | 'boost',
     quantity: number = 1,
     boostMetadata?: { itemId: string; itemCategory: string }
 ): Promise<void> {
-     const user = auth.currentUser;
-    if (!user) {
-        return redirect('/login');
-    }
 
     const priceId = product === 'token' ? TOKEN_PRICE_ID : BOOST_PRICE_ID;
     const successPath = product === 'token' 
@@ -127,7 +121,7 @@ export async function createOneTimeCheckoutSession(
         throw new Error('Stripe one-time product price IDs are not configured correctly in your environment variables.');
     }
     
-    const customerId = await getOrCreateStripeCustomerId(user.uid, user.email!);
+    const customerId = await getOrCreateStripeCustomerId(userId, email);
 
     const checkoutSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -140,7 +134,7 @@ export async function createOneTimeCheckoutSession(
         success_url: `${process.env.NEXT_PUBLIC_URL}${successPath}`,
         cancel_url: `${process.env.NEXT_PUBLIC_URL}${product === 'token' ? '/profile/buy-tokens' : `/${boostMetadata?.itemCategory}/${boostMetadata?.itemId}`}`,
          metadata: {
-            firebaseUID: user.uid,
+            firebaseUID: userId,
             productType: product,
             quantity: String(quantity),
             ...(product === 'boost' && boostMetadata ? {
@@ -157,13 +151,8 @@ export async function createOneTimeCheckoutSession(
 }
 
 
-export async function createCustomerPortalSession(): Promise<void> {
-    const user = auth.currentUser;
-    if (!user) {
-        return redirect('/login');
-    }
-
-    const customerId = await getOrCreateStripeCustomerId(user.uid, user.email!);
+export async function createCustomerPortalSession(userId: string, email: string): Promise<void> {
+    const customerId = await getOrCreateStripeCustomerId(userId, email);
 
     const portalSession = await stripe.billingPortal.sessions.create({
         customer: customerId,

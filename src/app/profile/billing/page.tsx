@@ -26,9 +26,10 @@ export default function BillingPage() {
   const isSubscribed = userProfile?.isPlusUser || userProfile?.isUltimateUser;
 
   const handleManageBilling = async () => {
+    if (!user || !user.email) return;
     setIsProcessing(true);
     try {
-        await createCustomerPortalSession();
+        await createCustomerPortalSession(user.uid, user.email);
         // User is redirected by the server action
     } catch (error: any) {
         toast({

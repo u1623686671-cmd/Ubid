@@ -28,10 +28,11 @@ export default function SubscriptionPage() {
   const { data: userProfile, isLoading: isUserProfileLoading } = useDoc(userProfileRef);
   
   const handleCheckout = async (plan: 'plus' | 'ultimate', billingCycle: 'monthly' | 'yearly') => {
+      if (!user || !user.email) return;
       setIsProcessing(true);
       setProcessingPlan(`${plan}-${billingCycle}`);
       try {
-          await createCheckoutSession(plan, billingCycle);
+          await createCheckoutSession(user.uid, user.email, plan, billingCycle);
           // The user will be redirected to Stripe by the server action.
       } catch (error: any) {
           toast({
@@ -45,10 +46,11 @@ export default function SubscriptionPage() {
   }
 
   const handleManageBilling = async () => {
+      if (!user || !user.email) return;
       setIsProcessing(true);
       setProcessingPlan('manage');
       try {
-          await createCustomerPortalSession();
+          await createCustomerPortalSession(user.uid, user.email);
       } catch (error: any) {
           toast({
               variant: 'destructive',
