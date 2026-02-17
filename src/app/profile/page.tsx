@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -273,7 +274,7 @@ export default function ProfilePage() {
                             </div>
                         </div>
                         <div className="text-center mt-4">
-                            <h2 className="text-xl font-semibold">{user.displayName || "User"}</h2>
+                            <h2 className="text-xl font-semibold">{userProfile?.firstName || "User"}</h2>
                             <p className="text-sm text-muted-foreground">{user.email}</p>
                         </div>
                     </div>
@@ -372,3 +373,5 @@ export default function ProfilePage() {
 
     
 }
+
+    
