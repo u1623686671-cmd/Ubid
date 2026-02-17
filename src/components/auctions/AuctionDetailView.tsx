@@ -84,7 +84,7 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
   // Effect to increment view count, runs only once per session per item.
   useEffect(() => {
     // Guard against running on server or without necessary data
-    if (typeof window === 'undefined' || !firestore || !itemRef) {
+    if (typeof window === 'undefined' || !user || !firestore || !itemRef) {
       return;
     }
 
@@ -110,7 +110,7 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
         errorEmitter.emit('permission-error', permissionError);
       });
     }
-  }, [firestore, itemRef, itemId]); // Minimal dependencies to prevent unnecessary re-runs.
+  }, [firestore, itemRef, itemId, user]); // Added user dependency
 
   // Separate effect for personalization logging
   useEffect(() => {
