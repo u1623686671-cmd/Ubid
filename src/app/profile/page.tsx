@@ -164,7 +164,9 @@ export default function ProfilePage() {
 
             const resizedDataUrl = await resizeImage(fileToProcess, 96, 96);
 
-            await updateProfile(auth.currentUser, { photoURL: resizedDataUrl });
+            // The updateProfile call can be too restrictive on data URL length.
+            // Since the app prioritizes the Firestore photoURL anyway, we can rely solely on that.
+            // await updateProfile(auth.currentUser, { photoURL: resizedDataUrl });
             await updateDoc(userProfileRef, { photoURL: resizedDataUrl });
 
             toast({
