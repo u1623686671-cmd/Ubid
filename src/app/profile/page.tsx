@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -319,7 +320,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                    <h3 className="text-lg font-semibold mb-4 mt-8">Account Settings</h3>
+                    <h3 className="text-lg font-semibold mb-4 mt-12">Account Settings</h3>
                     <div>
                         {accountNavItems.map((item) => (
                             <Link href={item.href} key={item.title} className="block group">
@@ -336,7 +337,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                    <h3 className="text-lg font-semibold mb-4 mt-8">Legal</h3>
+                    <h3 className="text-lg font-semibold mb-4 mt-12">Legal</h3>
                     <div>
                         {legalNavItems.map((item) => (
                             <Link href={item.href} key={item.title} className="block group">
