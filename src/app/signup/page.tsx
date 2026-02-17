@@ -77,22 +77,20 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (user && !isUserLoading) {
-        const userDocRef = doc(firestore, 'users', user.uid);
-        getDoc(userDocRef).then(docSnap => {
-            if (!docSnap.exists()) {
-                setIsCompletingProfile(true);
-                
-                if (user.displayName) {
-                    const names = user.displayName.split(' ');
-                    form.setValue('firstName', names[0] || '');
-                    form.setValue('lastName', names.slice(1).join(' ') || '');
-                }
-            } else {
-                 router.replace('/home');
-            }
-        });
+      // AuthGate has determined the user is logged in but needs to complete their profile.
+      // We just need to update the UI state.
+      setIsCompletingProfile(true);
+      
+      if (user.displayName) {
+          const names = user.displayName.split(' ');
+          form.setValue('firstName', names[0] || '');
+          form.setValue('lastName', names.slice(1).join(' ') || '');
+      }
+    } else {
+      // User is not logged in, show the standard signup form.
+      setIsCompletingProfile(false);
     }
-  }, [user, isUserLoading, firestore, form, router]);
+  }, [user, isUserLoading, form]);
   
   const processUserCreation = async (userToProcess: User, values: z.infer<typeof signupSchema>) => {
       await userToProcess.getIdToken(true); // Force refresh token
