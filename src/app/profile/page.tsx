@@ -13,7 +13,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Loading from './loading';
-import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -125,34 +124,39 @@ export default function ProfilePage() {
                 </p>
             </header>
             <div className="space-y-8">
-                <Card className="relative shadow-sm">
-                    <CardContent className="pt-6 flex flex-col items-center text-center">
-                      <Avatar className="w-24 h-24 mb-4">
-                        {(userProfile?.photoURL || user.photoURL) && <AvatarImage src={userProfile?.photoURL || user.photoURL!} data-ai-hint="person face" />}
-                        <AvatarFallback>{user.displayName ? getInitials(user.displayName) : 'U'}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-semibold">{user.displayName || "User"}</h2>
-                        {userProfile?.isUltimateUser ? (
-                          <Badge className="bg-purple-500 text-white hover:bg-purple-500">ULTIMATE</Badge>
-                        ) : userProfile?.isPlusUser && (
-                          <Badge className="bg-[hsl(var(--info-emphasis))] text-[hsl(var(--info-emphasis-foreground))] hover:bg-[hsl(var(--info-emphasis))]">PLUS</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                    </CardContent>
-                    <CardFooter className="flex-col gap-2">
-                         <Button asChild variant="outline" className="w-full">
-                            <Link href="/profile/account-details">
-                                <User className="mr-2 h-4 w-4"/>
-                                Edit Profile
-                            </Link>
-                        </Button>
-                        <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleLogout}>
-                            <LogOut className="mr-2 h-4 w-4"/>
-                            Logout
-                        </Button>
-                    </CardFooter>
+                <Card className="overflow-hidden shadow-lg border-0">
+                    <div className="h-24 bg-gradient-to-r from-primary/10 via-secondary to-primary/10" />
+                    <div className="relative p-6 pt-0">
+                        <div className="flex justify-center -mt-12">
+                            <Avatar className="w-24 h-24 border-4 border-background">
+                                {(userProfile?.photoURL || user.photoURL) && <AvatarImage src={userProfile?.photoURL || user.photoURL!} data-ai-hint="person face" />}
+                                <AvatarFallback className="text-3xl">{user.displayName ? getInitials(user.displayName) : 'U'}</AvatarFallback>
+                            </Avatar>
+                        </div>
+                        <div className="text-center mt-4">
+                            <div className="flex items-center justify-center gap-2">
+                                <h2 className="text-xl font-semibold">{user.displayName || "User"}</h2>
+                                {userProfile?.isUltimateUser ? (
+                                <Badge className="bg-purple-500 text-white hover:bg-purple-500">ULTIMATE</Badge>
+                                ) : userProfile?.isPlusUser && (
+                                <Badge className="bg-sky-500 text-white hover:bg-sky-500">PLUS</Badge>
+                                )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                        </div>
+                         <div className="mt-6 flex flex-col sm:flex-row gap-2">
+                             <Button asChild variant="outline" className="w-full">
+                                <Link href="/profile/account-details">
+                                    <User className="mr-2 h-4 w-4"/>
+                                    Edit Profile
+                                </Link>
+                            </Button>
+                            <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleLogout}>
+                                <LogOut className="mr-2 h-4 w-4"/>
+                                Logout
+                            </Button>
+                        </div>
+                    </div>
                 </Card>
 
                 {admin && (
