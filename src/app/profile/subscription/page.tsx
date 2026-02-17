@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from '@/lib/utils';
 import { createCheckoutSession, createCustomerPortalSession } from '@/lib/stripe/actions';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function SubscriptionPage() {
   const { user, isUserLoading } = useUser();
@@ -23,16 +24,17 @@ export default function SubscriptionPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   const userProfileRef = useMemoFirebase(() => user ? doc(firestore, 'users', user.uid) : null, [firestore, user]);
   const { data: userProfile, isLoading: isUserProfileLoading } = useDoc(userProfileRef);
   
-  const handleCheckout = async (plan: 'plus' | 'ultimate', billingCycle: 'monthly' | 'yearly') => {
+  const handleCheckout = async (plan: 'plus' | 'ultimate', cycle: 'monthly' | 'yearly') => {
       if (!user || !user.email) return;
       setIsProcessing(true);
-      setProcessingPlan(`${plan}-${billingCycle}`);
+      setProcessingPlan(`${plan}-${cycle}`);
       try {
-          await createCheckoutSession(user.uid, user.email, plan, billingCycle);
+          await createCheckoutSession(user.uid, user.email, plan, cycle);
           // The user will be redirected to Stripe by the server action.
       } catch (error: any) {
           toast({
@@ -92,7 +94,7 @@ export default function SubscriptionPage() {
   const isUltimateUser = userProfile?.isUltimateUser || false;
   const isSubscribed = isPlusUser || isUltimateUser;
 
-  const billingCycle = userProfile?.subscriptionBillingCycle;
+  const currentBillingCycle = userProfile?.subscriptionBillingCycle;
   const renewalDate = userProfile?.subscriptionRenewalDate?.toDate();
   const hasStripeSubscription = !!userProfile?.stripeSubscriptionId;
 
@@ -105,7 +107,7 @@ export default function SubscriptionPage() {
                 </Link>
             </Button>
         </div>
-        <header className="text-center mb-12">
+        <header className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold font-headline">Subscription Plans</h1>
             <p className="text-lg text-muted-foreground mt-2">Choose the plan that's right for you.</p>
         </header>
@@ -125,8 +127,8 @@ export default function SubscriptionPage() {
                         ) : isPlusUser ? (
                             <Badge className="bg-sky-500 text-white hover:bg-sky-500 text-base">PLUS</Badge>
                         ) : null}
-                         {billingCycle && (
-                            <span className="text-sm text-muted-foreground capitalize">({billingCycle})</span>
+                         {currentBillingCycle && (
+                            <span className="text-sm text-muted-foreground capitalize">({currentBillingCycle})</span>
                         )}
                     </div>
                      {renewalDate ? (
@@ -152,6 +154,16 @@ export default function SubscriptionPage() {
             </CardContent>
           </Card>
         )}
+
+        <div className="text-center mb-8">
+            <Tabs defaultValue="monthly" onValueChange={(value) => setBillingCycle(value as 'monthly' | 'yearly')} className="inline-block">
+                <TabsList>
+                    <TabsTrigger value="monthly">Billed Monthly</TabsTrigger>
+                    <TabsTrigger value="yearly">Billed Yearly (Save 17%)</TabsTrigger>
+                </TabsList>
+            </Tabs>
+        </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
         <Card className="flex flex-col">
@@ -184,11 +196,11 @@ export default function SubscriptionPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-grow">
-            <div className="text-4xl font-bold font-headline">
-              $4.99
-              <span className="text-base font-normal text-muted-foreground">/month</span>
-            </div>
-            <p className="text-sm text-muted-foreground">or $49.99/year (save 17%)</p>
+            {billingCycle === 'monthly' ? (
+                <div className="text-4xl font-bold font-headline">$4.99<span className="text-base font-normal text-muted-foreground">/month</span></div>
+            ) : (
+                <div className="text-4xl font-bold font-headline">$49.99<span className="text-base font-normal text-muted-foreground">/year</span></div>
+            )}
             <ul className="space-y-2 text-foreground">
               {plusFeatures.map((feature, index) => (
                 <li key={index} className="flex items-start">
@@ -198,22 +210,14 @@ export default function SubscriptionPage() {
               ))}
             </ul>
           </CardContent>
-           <CardFooter className="flex-col gap-2">
+           <CardFooter>
                 <Button 
-                    onClick={() => handleCheckout('plus', 'monthly')} 
+                    onClick={() => handleCheckout('plus', billingCycle)} 
                     disabled={isProcessing} 
                     className="w-full bg-sky-500 text-white hover:bg-sky-500/90"
                 >
-                    {isProcessing && processingPlan === 'plus-monthly' && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                    Choose Monthly
-                </Button>
-                <Button 
-                    onClick={() => handleCheckout('plus', 'yearly')}
-                    disabled={isProcessing}
-                    className="w-full bg-sky-700 text-white hover:bg-sky-700/90"
-                >
-                     {isProcessing && processingPlan === 'plus-yearly' && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                    Choose Yearly
+                    {isProcessing && processingPlan === `plus-${billingCycle}` && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                    Upgrade to Plus
                 </Button>
           </CardFooter>
         </Card>
@@ -227,11 +231,11 @@ export default function SubscriptionPage() {
             <CardDescription>For power users who want every advantage.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-grow">
-             <div className="text-4xl font-bold font-headline">
-                $9.99
-                <span className="text-base font-normal text-muted-foreground">/month</span>
-            </div>
-            <p className="text-sm text-muted-foreground">or $99.99/year (save 17%)</p>
+             {billingCycle === 'monthly' ? (
+                <div className="text-4xl font-bold font-headline">$9.99<span className="text-base font-normal text-muted-foreground">/month</span></div>
+             ) : (
+                <div className="text-4xl font-bold font-headline">$99.99<span className="text-base font-normal text-muted-foreground">/year</span></div>
+             )}
              <ul className="space-y-2 text-foreground">
               {ultimateFeatures.map((feature, index) => (
                 <li key={index} className="flex items-start">
@@ -241,22 +245,14 @@ export default function SubscriptionPage() {
               ))}
             </ul>
           </CardContent>
-          <CardFooter className="flex-col gap-2">
+          <CardFooter>
                 <Button 
-                    onClick={() => handleCheckout('ultimate', 'monthly')}
+                    onClick={() => handleCheckout('ultimate', billingCycle)}
                     disabled={isProcessing}
                     className="w-full bg-purple-500 text-white hover:bg-purple-500/90"
                 >
-                    {isProcessing && processingPlan === 'ultimate-monthly' && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                    Choose Monthly
-                </Button>
-                <Button 
-                    onClick={() => handleCheckout('ultimate', 'yearly')}
-                    disabled={isProcessing}
-                    className="w-full bg-purple-700 text-white hover:bg-purple-700/90"
-                >
-                     {isProcessing && processingPlan === 'ultimate-yearly' && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                    Choose Yearly
+                    {isProcessing && processingPlan === `ultimate-${billingCycle}` && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                    Upgrade to Ultimate
                 </Button>
           </CardFooter>
         </Card>
