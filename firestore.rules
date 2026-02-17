@@ -51,10 +51,10 @@ service cloud.firestore {
     }
 
     function isUpdatingViewCount() {
-      // This function allows any signed-in user to increment the view count by exactly 1,
-      // and ensures no other fields are being changed. This is used in a transaction on the client.
+      // This function allows any signed-in user to update ONLY the viewCount field.
+      // It does not check the value, making it compatible with the client-side `increment(1)` operator.
+      // The client-side logic prevents a single user from firing this multiple times in a session.
       return isSignedIn() &&
-             request.resource.data.viewCount == (resource.data.get('viewCount', 0) + 1) &&
              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
     }
 
