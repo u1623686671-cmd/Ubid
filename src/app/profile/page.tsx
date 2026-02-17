@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -249,9 +250,9 @@ export default function ProfilePage() {
                                 {(userProfile?.isUltimateUser || userProfile?.isPlusUser) && (
                                     <>
                                         {userProfile.isUltimateUser ? (
-                                            <Badge className="bg-purple-500 text-white hover:bg-purple-500 border-2 border-background -translate-y-6">ULTIMATE</Badge>
+                                            <Badge className="bg-purple-500 text-white hover:bg-purple-500 border-2 border-background">ULTIMATE</Badge>
                                         ) : userProfile.isPlusUser ? (
-                                            <Badge className="bg-sky-500 text-white hover:bg-sky-500 border-2 border-background -translate-y-6">PLUS</Badge>
+                                            <Badge className="bg-sky-500 text-white hover:bg-sky-500 border-2 border-background">PLUS</Badge>
                                         ) : null}
                                     </>
                                 )}
@@ -307,7 +308,7 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                     <Link href="/my-bids">
                         <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group rounded-2xl">
                             <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
