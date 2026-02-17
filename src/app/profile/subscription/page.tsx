@@ -93,7 +93,7 @@ export default function SubscriptionPage() {
   const isSubscribed = isPlusUser || isUltimateUser;
 
   const billingCycle = userProfile?.subscriptionBillingCycle;
-  const renewalDate = userProfile?.subscriptionRenewalDate ? userProfile.subscriptionRenewalDate.toDate() : null;
+  const renewalDate = userProfile?.subscriptionRenewalDate?.toDate();
   const hasStripeSubscription = !!userProfile?.stripeSubscriptionId;
 
   return (
@@ -135,7 +135,7 @@ export default function SubscriptionPage() {
                         </p>
                     ) : (
                         <p className="text-sm text-muted-foreground">
-                           You have an active subscription.
+                           Renewal date will display after payment processing.
                         </p>
                     )}
                 </div>
@@ -145,7 +145,7 @@ export default function SubscriptionPage() {
                       disabled={isProcessing}
                       className="w-full sm:w-auto shrink-0"
                   >
-                      {isProcessing && processingPlan === 'manage' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      {isProcessing && processingPlan === 'manage' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Manage Billing
                   </Button>
                 )}
