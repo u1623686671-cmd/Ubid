@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Gavel, User, CreditCard, KeyRound, LifeBuoy, LogOut, Package, Shield, ChevronRight, FileText, Info, Coins, PlusCircle, AlertTriangle, Loader2, Upload } from 'lucide-react';
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
-import { doc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -240,9 +240,9 @@ export default function ProfilePage() {
                     <div className="h-24 bg-gradient-to-r from-primary to-accent" />
                     <div className="relative p-6 pt-0">
                         <div className="flex items-center -mt-12">
-                            <div className="flex-1 flex justify-start">
+                            <div className="flex-1 flex justify-center">
                                 {(userProfile?.isUltimateUser || userProfile?.isPlusUser) && (
-                                    <div className="mt-12 -ml-2">
+                                    <div className="mt-12">
                                         {userProfile.isUltimateUser ? (
                                             <Badge className="bg-purple-500 text-white hover:bg-purple-500 border-2 border-background">ULTIMATE</Badge>
                                         ) : userProfile.isPlusUser ? (
