@@ -15,12 +15,14 @@ import { format, add } from "date-fns";
 import { cn } from '@/lib/utils';
 import {
     AlertDialog,
+    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 
@@ -33,6 +35,7 @@ export default function SubscriptionPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   const [planToUpgrade, setPlanToUpgrade] = useState<'plus' | 'ultimate' | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const userProfileRef = useMemoFirebase(() => user ? doc(firestore, 'users', user.uid) : null, [firestore, user]);
   const { data: userProfile, isLoading: isUserProfileLoading } = useDoc(userProfileRef);
@@ -82,26 +85,32 @@ export default function SubscriptionPage() {
       }
   }
 
-  const handleManageBilling = async () => {
-    if (!user || !user.email) return;
-    setIsProcessing(true);
-    setProcessingPlan('manage');
+  const handleCancelSubscription = async () => {
+    if (!user || !userProfileRef) return;
+    setIsCancelling(true);
     try {
+        await updateDoc(userProfileRef, {
+            isPlusUser: false,
+            isUltimateUser: false,
+            subscriptionBillingCycle: null,
+            stripeSubscriptionId: null,
+            subscriptionRenewalDate: null,
+        });
         toast({
-            title: 'Billing Management Disabled',
-            description: 'Stripe is currently bypassed for demonstration purposes.',
+            variant: 'success',
+            title: 'Subscription Cancelled',
+            description: 'Your subscription has been cancelled and will not renew.',
         });
     } catch (error: any) {
         toast({
             variant: 'destructive',
-            title: 'Error',
-            description: error.message || 'Could not open the billing portal.',
+            title: 'Cancellation Failed',
+            description: error.message || 'Could not cancel your subscription.',
         });
     } finally {
-        setIsProcessing(false);
-        setProcessingPlan(null);
+        setIsCancelling(false);
     }
-  }
+  };
 
 
   const freeFeatures = [
@@ -135,7 +144,6 @@ export default function SubscriptionPage() {
 
   const currentBillingCycle = userProfile?.subscriptionBillingCycle;
   const renewalDate = userProfile?.subscriptionRenewalDate?.toDate();
-  const hasStripeSubscription = !!userProfile?.stripeSubscriptionId;
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-12 md:py-16">
@@ -219,16 +227,28 @@ export default function SubscriptionPage() {
                         </p>
                     )}
                 </div>
-                {hasStripeSubscription && (
-                  <Button 
-                      onClick={handleManageBilling} 
-                      disabled={isProcessing}
-                      className="w-full sm:w-auto shrink-0"
-                  >
-                      {isProcessing && processingPlan === 'manage' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Manage Billing
-                  </Button>
-                )}
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="w-full sm:w-auto">Cancel Subscription</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                This will cancel your subscription. You will lose access to premium features at the end of your current billing period.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel disabled={isCancelling}>Keep Subscription</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleCancelSubscription} disabled={isCancelling} className="bg-destructive hover:bg-destructive/90">
+                                {isCancelling ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                                Yes, Cancel
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             </CardContent>
           </Card>
         )}
@@ -288,11 +308,11 @@ export default function SubscriptionPage() {
            <CardFooter>
                 <Button 
                     onClick={() => setPlanToUpgrade('plus')}
-                    disabled={isProcessing || isPlusUser} 
+                    disabled={isProcessing || isPlusUser || isUltimateUser} 
                     className="w-full bg-sky-500 text-white hover:bg-sky-500/90"
                 >
                     {isProcessing && processingPlan?.startsWith('plus') && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                    {isPlusUser ? 'Current Plan' : 'Upgrade to Plus'}
+                    {isPlusUser ? 'Current Plan' : isUltimateUser ? 'Downgrade Not Available' : 'Upgrade to Plus'}
                 </Button>
           </CardFooter>
         </Card>
