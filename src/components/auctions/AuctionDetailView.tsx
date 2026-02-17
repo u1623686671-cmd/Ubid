@@ -60,8 +60,6 @@ type AuctionDetailViewProps = {
   category: string;
 };
 
-const sessionViewedItems = new Set<string>();
-
 export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -85,14 +83,27 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
 
     // Effect to log user view for personalization and increment view count
   useEffect(() => {
-    if (user && firestore && itemRef && !isItemLoading && item && !sessionViewedItems.has(itemId)) {
-        sessionViewedItems.add(itemId);
+    if (!user || !firestore || !itemRef || isItemLoading || !item) {
+        return;
+    }
 
-        // --- Increment view count ---
+    try {
+        const viewedItemsKey = 'sessionViewCountedIds'; // Use a specific key for the view count
+        const viewedItemsRaw = localStorage.getItem(viewedItemsKey);
+        const viewedItems = viewedItemsRaw ? JSON.parse(viewedItemsRaw) : [];
+        
+        // If we have already incremented the view for this item in this session, stop.
+        if (viewedItems.includes(itemId)) {
+            return; 
+        }
+
+        // --- Mark as viewed for this session and update count ---
+        viewedItems.push(itemId);
+        localStorage.setItem(viewedItemsKey, JSON.stringify(viewedItems));
+
         updateDoc(itemRef, {
             viewCount: increment(1)
         }).catch(err => {
-            // This is a non-critical background task, but we still report it for debugging.
             const permissionError = new FirestorePermissionError({
                 path: itemRef.path,
                 operation: 'update',
@@ -101,42 +112,32 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
             errorEmitter.emit('permission-error', permissionError);
         });
       
-      // --- Log for immediate client-side suggestions ---
-      try {
+        // --- Log for immediate client-side suggestions ---
         const MAX_HISTORY = 50;
-        
-        // 1. Log viewed category
         const categories = JSON.parse(localStorage.getItem('viewedCategories') || '[]');
         categories.unshift(category);
-        if (categories.length > MAX_HISTORY) {
-          categories.pop();
-        }
+        if (categories.length > MAX_HISTORY) categories.pop();
         localStorage.setItem('viewedCategories', JSON.stringify(categories));
 
-        // 2. Log viewed item ID
         const itemIds = JSON.parse(localStorage.getItem('viewedItemIds') || '[]');
         if (!itemIds.includes(itemId)) {
-          itemIds.unshift(itemId);
-          if (itemIds.length > MAX_HISTORY) {
-            itemIds.pop();
-          }
-          localStorage.setItem('viewedItemIds', JSON.stringify(itemIds));
+            itemIds.unshift(itemId);
+            if (itemIds.length > MAX_HISTORY) itemIds.pop();
+            localStorage.setItem('viewedItemIds', JSON.stringify(itemIds));
         }
-
-      } catch (e) {
-        console.error("Could not write to localStorage for suggestions:", e);
-      }
       
-      // --- Log for future server-side processing ---
-      // This is a "fire-and-forget" operation for analytics.
-      const interactionRef = collection(firestore, 'userInteractions');
-      addDoc(interactionRef, {
-        userId: user.uid,
-        itemId: itemId,
-        category: category,
-        interactionType: 'view',
-        timestamp: serverTimestamp(),
-      });
+        // --- Log for future server-side processing ---
+        const interactionRef = collection(firestore, 'userInteractions');
+        addDoc(interactionRef, {
+            userId: user.uid,
+            itemId: itemId,
+            category: category,
+            interactionType: 'view',
+            timestamp: serverTimestamp(),
+        });
+
+    } catch (e) {
+      console.error("Could not process view tracking from localStorage:", e);
     }
   }, [user, firestore, itemRef, isItemLoading, item, category, itemId]);
 
