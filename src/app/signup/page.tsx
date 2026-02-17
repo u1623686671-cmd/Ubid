@@ -197,6 +197,9 @@ export default function SignupPage() {
             <FormItem>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl><Input type="tel" placeholder="+1 234 567 890" {...field} /></FormControl>
+                <FormDescription>
+                    Your phone number and email stay private. They're just for us for support!
+                </FormDescription>
                 <FormMessage />
             </FormItem>
         )} />
