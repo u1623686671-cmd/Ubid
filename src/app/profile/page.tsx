@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -13,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Loading from './loading';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useToast } from '@/hooks/use-toast';
@@ -275,12 +274,6 @@ export default function ProfilePage() {
                             </div>
                             <p className="text-sm text-muted-foreground">{user.email}</p>
                         </div>
-                         <div className="mt-6 flex flex-col gap-2">
-                            <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleLogout}>
-                                <LogOut className="mr-2 h-4 w-4"/>
-                                Logout
-                            </Button>
-                        </div>
                     </div>
                 </Card>
 
@@ -363,6 +356,14 @@ export default function ProfilePage() {
                         ))}
                     </div>
                 </div>
+
+                <div className="mt-8">
+                    <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4"/>
+                        Logout
+                    </Button>
+                </div>
+
             </div>
         </div>
     );
