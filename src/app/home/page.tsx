@@ -158,6 +158,10 @@ export default function HomePage() {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
+
   const handleItemSelect = (item: {id: string, category: string}) => {
     if (isMobile) {
       setSelectedItem(item);
