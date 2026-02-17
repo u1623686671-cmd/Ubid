@@ -163,7 +163,7 @@ export default function ProfilePage() {
                 fileToProcess = new File([convertedBlob], newFileName, { type: 'image/jpeg' });
             }
 
-            const resizedDataUrl = await resizeImage(fileToProcess, 128, 128);
+            const resizedDataUrl = await resizeImage(fileToProcess, 96, 96);
 
             await updateProfile(auth.currentUser, { photoURL: resizedDataUrl });
             await updateDoc(userProfileRef, { photoURL: resizedDataUrl });
