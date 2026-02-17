@@ -229,7 +229,7 @@ export default function FlashAuctionsPage() {
                                             isWatchlistLoading={isWatchlistLoading || isUserLoading}
                                         />
                                         {item.isPromoted && (
-                                            <Badge variant="outline" className="absolute bottom-2 left-2 z-10 flex items-center gap-1 bg-black/50 text-white backdrop-blur-sm border-none text-xs">
+                                            <Badge className="absolute bottom-2 left-2 z-10 flex items-center gap-1 border-transparent bg-accent text-accent-foreground text-xs hover:bg-accent/80">
                                                 <Star className="h-3 w-3" />
                                                 Sponsored
                                             </Badge>
