@@ -14,7 +14,16 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from '@/lib/utils';
 import { createCheckoutSession, createCustomerPortalSession } from '@/lib/stripe/actions';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 
 export default function SubscriptionPage() {
   const { user, isUserLoading } = useUser();
@@ -24,7 +33,7 @@ export default function SubscriptionPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [planToUpgrade, setPlanToUpgrade] = useState<'plus' | 'ultimate' | null>(null);
 
   const userProfileRef = useMemoFirebase(() => user ? doc(firestore, 'users', user.uid) : null, [firestore, user]);
   const { data: userProfile, isLoading: isUserProfileLoading } = useDoc(userProfileRef);
@@ -100,6 +109,45 @@ export default function SubscriptionPage() {
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-12 md:py-16">
+        <AlertDialog open={!!planToUpgrade} onOpenChange={(open) => !open && setPlanToUpgrade(null)}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>Choose Billing Cycle</AlertDialogTitle>
+                <AlertDialogDescription>
+                    You'll be redirected to Stripe to complete your purchase. You can save ~17% with a yearly plan.
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                    <Button
+                        variant="outline"
+                        className="h-auto py-4 flex flex-col"
+                        onClick={() => handleCheckout(planToUpgrade!, 'monthly')}
+                        disabled={isProcessing}
+                    >
+                        <span className="font-bold text-lg">Billed Monthly</span>
+                        <span className="text-muted-foreground text-sm">
+                            {planToUpgrade === 'plus' ? '$4.99 / month' : '$9.99 / month'}
+                        </span>
+                        {isProcessing && processingPlan === `${planToUpgrade}-monthly` && <Loader2 className="mt-2 h-4 w-4 animate-spin"/>}
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="h-auto py-4 flex flex-col border-primary/50"
+                        onClick={() => handleCheckout(planToUpgrade!, 'yearly')}
+                        disabled={isProcessing}
+                    >
+                        <span className="font-bold text-lg text-primary">Billed Yearly</span>
+                        <span className="text-muted-foreground text-sm">
+                            {planToUpgrade === 'plus' ? '$49.99 / year' : '$99.99 / year'}
+                        </span>
+                        {isProcessing && processingPlan === `${planToUpgrade}-yearly` && <Loader2 className="mt-2 h-4 w-4 animate-spin"/>}
+                    </Button>
+                </div>
+                <AlertDialogFooter className="pt-2">
+                    <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
         <div className="mb-6">
             <Button asChild variant="ghost" size="icon" className="rounded-full bg-muted text-muted-foreground hover:bg-muted/80">
                 <Link href="/profile">
@@ -107,7 +155,7 @@ export default function SubscriptionPage() {
                 </Link>
             </Button>
         </div>
-        <header className="text-center mb-8">
+        <header className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold font-headline">Subscription Plans</h1>
             <p className="text-lg text-muted-foreground mt-2">Choose the plan that's right for you.</p>
         </header>
@@ -155,15 +203,6 @@ export default function SubscriptionPage() {
           </Card>
         )}
 
-        <div className="text-center mb-8">
-            <Tabs defaultValue="monthly" onValueChange={(value) => setBillingCycle(value as 'monthly' | 'yearly')} className="inline-block">
-                <TabsList>
-                    <TabsTrigger value="monthly">Billed Monthly</TabsTrigger>
-                    <TabsTrigger value="yearly">Billed Yearly (Save 17%)</TabsTrigger>
-                </TabsList>
-            </Tabs>
-        </div>
-
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
         <Card className="flex flex-col">
@@ -196,11 +235,17 @@ export default function SubscriptionPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-grow">
-            {billingCycle === 'monthly' ? (
-                <div className="text-4xl font-bold font-headline">$4.99<span className="text-base font-normal text-muted-foreground">/month</span></div>
-            ) : (
-                <div className="text-4xl font-bold font-headline">$49.99<span className="text-base font-normal text-muted-foreground">/year</span></div>
-            )}
+            <div className="space-y-2">
+                <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold font-headline">$4.99</span>
+                    <span className="text-muted-foreground">/month</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold">$49.99</span>
+                    <span className="text-muted-foreground">/year</span>
+                    <Badge variant="outline" className="border-green-500 text-green-600">Save ~17%</Badge>
+                </div>
+            </div>
             <ul className="space-y-2 text-foreground">
               {plusFeatures.map((feature, index) => (
                 <li key={index} className="flex items-start">
@@ -212,11 +257,11 @@ export default function SubscriptionPage() {
           </CardContent>
            <CardFooter>
                 <Button 
-                    onClick={() => handleCheckout('plus', billingCycle)} 
+                    onClick={() => setPlanToUpgrade('plus')}
                     disabled={isProcessing} 
                     className="w-full bg-sky-500 text-white hover:bg-sky-500/90"
                 >
-                    {isProcessing && processingPlan === `plus-${billingCycle}` && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                    {isProcessing && processingPlan?.startsWith('plus') && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
                     Upgrade to Plus
                 </Button>
           </CardFooter>
@@ -231,11 +276,17 @@ export default function SubscriptionPage() {
             <CardDescription>For power users who want every advantage.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-grow">
-             {billingCycle === 'monthly' ? (
-                <div className="text-4xl font-bold font-headline">$9.99<span className="text-base font-normal text-muted-foreground">/month</span></div>
-             ) : (
-                <div className="text-4xl font-bold font-headline">$99.99<span className="text-base font-normal text-muted-foreground">/year</span></div>
-             )}
+             <div className="space-y-2">
+                <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold font-headline">$9.99</span>
+                    <span className="text-muted-foreground">/month</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold">$99.99</span>
+                    <span className="text-muted-foreground">/year</span>
+                    <Badge variant="outline" className="border-green-500 text-green-600">Save ~17%</Badge>
+                </div>
+            </div>
              <ul className="space-y-2 text-foreground">
               {ultimateFeatures.map((feature, index) => (
                 <li key={index} className="flex items-start">
@@ -247,11 +298,11 @@ export default function SubscriptionPage() {
           </CardContent>
           <CardFooter>
                 <Button 
-                    onClick={() => handleCheckout('ultimate', billingCycle)}
+                    onClick={() => setPlanToUpgrade('ultimate')}
                     disabled={isProcessing}
                     className="w-full bg-purple-500 text-white hover:bg-purple-500/90"
                 >
-                    {isProcessing && processingPlan === `ultimate-${billingCycle}` && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                    {isProcessing && processingPlan?.startsWith('ultimate') && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
                     Upgrade to Ultimate
                 </Button>
           </CardFooter>
