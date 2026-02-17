@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -237,7 +236,7 @@ export default function ProfilePage() {
                     <div className="h-24 bg-gradient-to-r from-primary to-accent" />
                     <div className="relative p-6 pt-0">
                         {isMobile && (
-                            <div className="absolute top-2 right-5">
+                            <div className="absolute top-1 right-5">
                                 <NotificationBell />
                             </div>
                         )}
@@ -307,7 +306,7 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-2 gap-4">
                     <Link href="/my-bids">
                         <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group rounded-2xl">
-                            <CardContent className="pt-6 flex flex-col items-center justify-center text-center min-h-[6rem]">
+                            <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
                                 <Gavel className="w-6 h-6 text-primary mb-2" />
                                 <p className="font-semibold text-base">My Bids</p>
                             </CardContent>
@@ -315,7 +314,7 @@ export default function ProfilePage() {
                     </Link>
                     <Link href="/retailer/dashboard">
                         <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group rounded-2xl">
-                            <CardContent className="pt-6 flex flex-col items-center justify-center text-center min-h-[6rem]">
+                            <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
                                 <Package className="w-6 h-6 text-primary mb-2" />
                                 <p className="font-semibold text-base">My Listings</p>
                             </CardContent>
