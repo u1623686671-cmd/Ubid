@@ -231,7 +231,7 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
               {item.imageUrls.map((url, index) => (
                 <CarouselItem key={index}>
                   <Card className="overflow-hidden">
-                    <CardContent className="flex aspect-[4/3] items-center justify-center p-0 relative">
+                    <CardContent className="flex aspect-square items-center justify-center p-0 relative">
                       <Image src={url} alt={`${title} image ${index + 1}`} fill className="object-cover" priority={index === 0} />
                     </CardContent>
                   </Card>
