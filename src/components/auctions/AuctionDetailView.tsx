@@ -4,7 +4,7 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase, errorEmitter, FirestorePermissionError } from "@/firebase";
-import { doc, collection, addDoc, serverTimestamp, updateDoc, increment } from "firebase/firestore";
+import { doc, collection, addDoc, serverTimestamp, updateDoc, increment, runTransaction } from "firebase/firestore";
 
 import {
   Card,
@@ -83,7 +83,6 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
 
   // Effect to increment view count, runs only once per session per item.
   useEffect(() => {
-    // Guard against running on server or without necessary data
     if (typeof window === 'undefined' || !user || !firestore || !itemRef) {
       return;
     }
@@ -94,16 +93,21 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
     if (!hasBeenViewedInSession) {
       sessionStorage.setItem(sessionViewKey, 'true');
 
-      // Use a non-blocking update with the server-side increment operator.
-      // This is atomic and avoids race conditions on the client.
-      updateDoc(itemRef, {
-          viewCount: increment(1)
+      // Use a transaction to safely increment the view count
+      runTransaction(firestore, async (transaction) => {
+        const itemDoc = await transaction.get(itemRef);
+        if (!itemDoc.exists()) {
+          console.log("Attempted to update view count on a non-existent document.");
+          return;
+        }
+
+        const currentViews = itemDoc.data()?.viewCount || 0;
+        transaction.update(itemRef, { viewCount: currentViews + 1 });
       }).catch(err => {
-          // Create our own for consistent reporting.
           const permissionError = new FirestorePermissionError({
               path: itemRef.path,
               operation: 'update',
-              requestResourceData: { viewCount: 'increment(1)' } // Use a string to indicate the operation type
+              requestResourceData: { viewCount: '[transactionally incremented]' }
           });
           errorEmitter.emit('permission-error', permissionError);
       });

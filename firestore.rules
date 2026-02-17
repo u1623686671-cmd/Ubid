@@ -51,10 +51,11 @@ service cloud.firestore {
     }
 
     function isUpdatingViewCount() {
-      // This function allows any user to update ONLY the viewCount field.
-      // It does not check the value, making it compatible with the client-side `increment(1)` operator.
-      // The `isSignedIn()` check is removed to prevent a mobile-specific race condition where auth state may not be ready.
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
+      // This function allows any user to update ONLY the viewCount field by exactly 1.
+      // It works with a client-side transaction that reads the current value first.
+      return isSignedIn() &&
+             request.resource.data.viewCount == resource.data.get('viewCount', 0) + 1 &&
+             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
     }
 
     // Collection Group Rules
@@ -322,5 +323,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
