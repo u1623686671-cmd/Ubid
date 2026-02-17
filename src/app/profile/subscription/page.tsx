@@ -230,7 +230,7 @@ export default function SubscriptionPage() {
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="w-full sm:w-auto">Cancel Subscription</Button>
+                            <Button variant="outline" className="w-full sm:w-auto">Cancel Subscription</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
