@@ -51,9 +51,10 @@ service cloud.firestore {
     }
 
     function isUpdatingViewCount() {
+      // A user can increment the view count by exactly 1, and change no other fields.
       return isSignedIn() &&
-             request.resource.data.viewCount == resource.data.get('viewCount', 0) + 1 &&
-             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']) &&
+        request.resource.data.viewCount == int(resource.data.get('viewCount', 0)) + 1;
     }
 
     // Collection Group Rules

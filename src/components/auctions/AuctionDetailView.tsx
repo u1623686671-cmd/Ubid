@@ -60,10 +60,11 @@ type AuctionDetailViewProps = {
   category: string;
 };
 
+const sessionViewedItems = new Set<string>();
+
 export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const viewCountedRef = useRef(false);
 
   const itemRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -84,8 +85,8 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
 
     // Effect to log user view for personalization and increment view count
   useEffect(() => {
-    if (user && firestore && itemRef && !isItemLoading && item && !viewCountedRef.current) {
-        viewCountedRef.current = true;
+    if (user && firestore && itemRef && !isItemLoading && item && !sessionViewedItems.has(itemId)) {
+        sessionViewedItems.add(itemId);
 
         // --- Increment view count ---
         updateDoc(itemRef, {
