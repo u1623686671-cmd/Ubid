@@ -690,54 +690,51 @@ export default function HomePage() {
             })}
             {items.length > 12 && viewAllLink && (
                 <div key="view-all" className="w-[45vw] sm:w-48 shrink-0">
-                    <Link href={viewAllLink} className="h-full flex flex-col group">
-                        <div className="p-0">
-                            <div className="relative w-full aspect-square flex items-center justify-center">
-                                {items.slice(0, 3).reverse().map((item, index) => {
-                                    const collectionName = item.category;
-                                    const isPlate = collectionName === 'plates';
-                                    const isPhoneNumber = collectionName === 'phoneNumbers';
-                                    let imageUrl = '';
-                                    if (!isPlate && !isPhoneNumber) {
-                                        imageUrl = (item.imageUrls && item.imageUrls[0]) || `https://picsum.photos/seed/${item.id}/200/200`;
-                                    }
+                    <Link href={viewAllLink} className="h-full flex flex-col group items-center justify-center p-3">
+                        <div className="relative w-full aspect-square flex items-center justify-center">
+                            {items.slice(0, 3).reverse().map((item, index) => {
+                                const collectionName = item.category;
+                                const isPlate = collectionName === 'plates';
+                                const isPhoneNumber = collectionName === 'phoneNumbers';
+                                let imageUrl = '';
+                                if (!isPlate && !isPhoneNumber) {
+                                    imageUrl = (item.imageUrls && item.imageUrls[0]) || `https://picsum.photos/seed/${item.id}/200/200`;
+                                }
 
-                                    return (
-                                        <div
-                                            key={item.id}
-                                            className="absolute w-2/3 aspect-square rounded-md overflow-hidden bg-muted border transition-transform duration-300 ease-in-out group-hover:rotate-0"
-                                            style={{
-                                                transform: `rotate(${index * 8 - 8}deg)`,
-                                                zIndex: 3 - index,
-                                            }}
-                                        >
-                                            {isPlate ? (
-                                                <div className="flex items-center justify-center h-full">
-                                                    <LebanesePlateDisplay plateNumber={item.itemName} />
-                                                </div>
-                                            ) : isPhoneNumber ? (
-                                                <div className="flex items-center justify-center h-full">
-                                                    <PhoneNumberDisplay phoneNumber={item.itemName} size="small" />
-                                                </div>
-                                            ) : (
-                                                <Image
-                                                    src={imageUrl}
-                                                    alt="" // Decorative
-                                                    fill
-                                                    className="object-cover"
-                                                />
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                return (
+                                    <div
+                                        key={item.id}
+                                        className="absolute w-2/3 aspect-square rounded-md overflow-hidden bg-muted border transition-transform duration-300 ease-in-out group-hover:rotate-0"
+                                        style={{
+                                            transform: `rotate(${index * 8 - 8}deg)`,
+                                            zIndex: 3 - index,
+                                        }}
+                                    >
+                                        {isPlate ? (
+                                            <div className="flex items-center justify-center h-full">
+                                                <LebanesePlateDisplay plateNumber={item.itemName} />
+                                            </div>
+                                        ) : isPhoneNumber ? (
+                                            <div className="flex items-center justify-center h-full">
+                                                <PhoneNumberDisplay phoneNumber={item.itemName} size="small" />
+                                            </div>
+                                        ) : (
+                                            <Image
+                                                src={imageUrl}
+                                                alt="" // Decorative
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
-                        <div className="p-3">
-                            <h3 className="font-headline text-base font-bold mb-1 leading-tight truncate group-hover:underline flex items-center gap-1">
+                        <div className="mt-4">
+                            <h3 className="font-headline text-base font-bold leading-tight truncate group-hover:underline flex items-center gap-1">
                                 See More
                                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
                             </h3>
-                            <p className="text-xs text-muted-foreground truncate">&nbsp;</p>
                         </div>
                     </Link>
                 </div>
