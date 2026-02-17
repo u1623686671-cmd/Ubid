@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { doc, collection, addDoc, serverTimestamp, updateDoc, increment } from "firebase/firestore";
 
 import {
   Card,
@@ -39,6 +39,7 @@ type AuctionDoc = {
     auctionStartDate: string; // ISO string
     isFlashAuction?: boolean;
     extendCount?: number;
+    viewCount?: number;
     // Category-specific fields
     name?: string; // alcohol
     itemName?: string; // others
@@ -62,6 +63,7 @@ type AuctionDetailViewProps = {
 export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const viewCountedRef = useRef(false);
 
   const itemRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -80,9 +82,18 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
   const userProfileRef = useMemoFirebase(() => user ? doc(firestore, 'users', user.uid) : null, [firestore, user]);
   const { data: userProfile, isLoading: isUserProfileLoading } = useDoc(userProfileRef);
 
-    // Effect to log user view for personalization
+    // Effect to log user view for personalization and increment view count
   useEffect(() => {
-    if (user && firestore && itemId && category && !isItemLoading && item) {
+    if (user && firestore && itemRef && !isItemLoading && item && !viewCountedRef.current) {
+        viewCountedRef.current = true;
+
+        // --- Increment view count ---
+        updateDoc(itemRef, {
+            viewCount: increment(1)
+        }).catch(err => {
+            // This is a non-critical background task.
+            console.error("Failed to increment view count:", err);
+        });
       
       // --- Log for immediate client-side suggestions ---
       try {
@@ -121,8 +132,7 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
         timestamp: serverTimestamp(),
       });
     }
-    // Only run once when the item has loaded and user is known.
-  }, [user, firestore, itemId, category, isItemLoading, item]);
+  }, [user, firestore, itemRef, isItemLoading, item, category, itemId]);
 
 
   if (isItemLoading || isUserLoading || areBidsLoading || isUserProfileLoading || !item) {
