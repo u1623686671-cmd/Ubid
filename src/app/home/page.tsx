@@ -751,6 +751,12 @@ export default function HomePage() {
     <div className="w-full">
        <Dialog open={!!selectedItem && isMobile} onOpenChange={(isOpen) => { if (!isOpen) setSelectedItem(null); }}>
         <DialogContent className="p-0">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Auction Details</DialogTitle>
+            <DialogDescription>
+              Viewing the details for the selected auction item.
+            </DialogDescription>
+          </DialogHeader>
           <ScrollArea className="h-full w-full">
             <div className="p-4 pt-8 sm:p-6 sm:pt-6">
               {selectedItem && (

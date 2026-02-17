@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { LebanesePlateDisplay } from "@/components/auctions/lebanese-plate-display";
 import { PhoneNumberDisplay } from "@/components/auctions/phone-number-display";
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AuctionDetailView } from "@/components/auctions/AuctionDetailView";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AuctionTimerBar } from "@/components/auctions/AuctionTimerBar";
@@ -336,6 +336,12 @@ export default function SuggestedPage() {
     <div className="container mx-auto px-4 py-12 md:py-16">
       <Dialog open={!!selectedItem && isMobile} onOpenChange={(isOpen) => { if (!isOpen) setSelectedItem(null); }}>
         <DialogContent className="p-0">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Auction Details</DialogTitle>
+            <DialogDescription>
+              Viewing the details for the selected auction item.
+            </DialogDescription>
+          </DialogHeader>
           <ScrollArea className="h-full w-full">
             <div className="p-4 pt-8 sm:p-6 sm:pt-6">
               {selectedItem && (

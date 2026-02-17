@@ -19,7 +19,7 @@ import Loading from "./loading";
 import { Button } from "@/components/ui/button";
 import { LebanesePlateDisplay } from "@/components/auctions/lebanese-plate-display";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AuctionDetailView } from "@/components/auctions/AuctionDetailView";
 import { AuctionTimerBar } from "@/components/auctions/AuctionTimerBar";
@@ -115,6 +115,12 @@ function WatchlistItemCard({ item }: { item: WatchlistItem }) {
         <>
             <Dialog open={!!selectedItem && isMobile} onOpenChange={(isOpen) => { if (!isOpen) setSelectedItem(null); }}>
                 <DialogContent className="p-0">
+                  <DialogHeader className="sr-only">
+                    <DialogTitle>Auction Details</DialogTitle>
+                    <DialogDescription>
+                      Viewing the details for the selected auction item.
+                    </DialogDescription>
+                  </DialogHeader>
                     <ScrollArea className="h-full w-full">
                         <div className="p-4 pt-8 sm:p-6 sm:pt-6">
                         {selectedItem && (
