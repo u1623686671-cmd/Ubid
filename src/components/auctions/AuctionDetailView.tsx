@@ -26,10 +26,6 @@ import { LebanesePlateDisplay } from "@/components/auctions/lebanese-plate-displ
 import { PhoneNumberDisplay } from "@/components/auctions/phone-number-display";
 import { AuctionTimerBar } from "./AuctionTimerBar";
 
-// Use a simple in-memory Set to track viewed items for the current session.
-// This is robust against component re-mounts within the same page load.
-const viewCountedInSession = new Set<string>();
-
 type AuctionDoc = {
     // Common fields
     userId: string;
@@ -91,24 +87,34 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
         return;
     }
 
-    // --- New View Counting Logic ---
-    // Use a simple in-memory Set to track viewed items for the current session.
-    // This is robust against component re-mounts within the same page load.
-    if (!viewCountedInSession.has(itemId)) {
-        viewCountedInSession.add(itemId); // Mark as counted for this session
+    // --- NEW View Counting Logic using sessionStorage ---
+    try {
+        const viewedItemsKey = 'ubid_viewed_items_session';
+        const viewedItemsJSON = sessionStorage.getItem(viewedItemsKey);
+        const viewedItems = new Set<string>(viewedItemsJSON ? JSON.parse(viewedItemsJSON) : []);
 
-        updateDoc(itemRef, {
-            viewCount: increment(1)
-        }).catch(err => {
-            const permissionError = new FirestorePermissionError({
-                path: itemRef.path,
-                operation: 'update',
-                requestResourceData: { viewCount: 'increment(1)' }
+        if (!viewedItems.has(itemId)) {
+            // Not viewed in this session, so increment count
+            updateDoc(itemRef, {
+                viewCount: increment(1)
+            }).catch(err => {
+                const permissionError = new FirestorePermissionError({
+                    path: itemRef.path,
+                    operation: 'update',
+                    requestResourceData: { viewCount: 'increment(1)' }
+                });
+                errorEmitter.emit('permission-error', permissionError);
             });
-            errorEmitter.emit('permission-error', permissionError);
-        });
-    }
 
+            // Add to the set and save back to sessionStorage
+            viewedItems.add(itemId);
+            sessionStorage.setItem(viewedItemsKey, JSON.stringify(Array.from(viewedItems)));
+        }
+    } catch (e) {
+        console.error("Could not update view count using sessionStorage:", e);
+        // Fallback or just log, to not break the page
+    }
+      
     // --- Log for immediate client-side suggestions (still uses localStorage) ---
     try {
         const MAX_HISTORY = 50;
@@ -137,7 +143,6 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
         timestamp: serverTimestamp(),
     }).catch(err => {
         // This is a background task, so we just log the error.
-        // It won't crash the app if it fails.
         console.error("Failed to log user interaction:", err);
     });
 
