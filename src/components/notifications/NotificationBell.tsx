@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Bell, Loader2 } from 'lucide-react';
@@ -82,11 +83,11 @@ export function NotificationBell() {
     return (
         <Popover onOpenChange={handleOpenChange}>
             <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="relative rounded-full h-12 w-12 bg-card hover:bg-muted">
-                    <Bell className="h-6 w-6" />
+                <Button variant="outline" size="icon" className="relative rounded-full h-10 w-10 bg-card hover:bg-muted">
+                    <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
-                         <span className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
-                            {unreadCount}
+                         <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+                            {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                     )}
                     <span className="sr-only">Toggle notifications</span>

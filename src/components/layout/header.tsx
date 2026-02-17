@@ -164,15 +164,18 @@ export function Header() {
             {isUserLoading ? (
               <div className="w-24 h-8 animate-pulse bg-muted rounded-md" />
             ) : user ? (
-              <div className="flex items-center gap-2">
-                {/* Mobile Plus Button */}
-                {!isProfilePage && (
-                  <Button size="sm" variant="outline" className="md:hidden text-primary border-primary font-bold hover:text-primary hover:bg-primary/10 gap-1 px-2" onClick={() => setIsListingDialogOpen(true)}>
-                      <Plus className="h-4 w-4" />
-                      Add item
-                  </Button>
-                )}
-                
+              <>
+                {/* Mobile actions */}
+                <div className="flex items-center gap-2 md:hidden">
+                  {!isProfilePage && (
+                    <Button size="sm" variant="outline" className="text-primary border-primary font-bold hover:text-primary hover:bg-primary/10 gap-1 px-2" onClick={() => setIsListingDialogOpen(true)}>
+                        <Plus className="h-4 w-4" />
+                        Add item
+                    </Button>
+                  )}
+                   <NotificationBell />
+                </div>
+              
                 {/* Desktop items */}
                 <div className="hidden md:flex items-center gap-2">
                     <Button asChild size="sm" variant="outline" className="text-primary border-primary font-bold hover:text-primary hover:bg-primary/10 gap-1 px-2">
@@ -220,7 +223,7 @@ export function Header() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-              </div>
+              </>
             ) : (
               <>
                 <Button variant="ghost" asChild>

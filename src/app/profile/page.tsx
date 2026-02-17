@@ -127,9 +127,7 @@ export default function ProfilePage() {
                 <Card className="relative shadow-sm">
                     {isMobile && (
                         <div className="absolute top-2 right-2">
-                             <Button variant="ghost" size="icon" className="relative h-12 w-12 rounded-full bg-muted/50 hover:bg-muted">
-                                <NotificationBell />
-                            </Button>
+                             <NotificationBell />
                         </div>
                     )}
                     <CardContent className="pt-6 flex flex-col items-center text-center">

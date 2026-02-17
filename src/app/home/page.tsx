@@ -800,11 +800,14 @@ export default function HomePage() {
                     </TabsList>
                 </div>
                 <div className="flex flex-1 items-center justify-end gap-2">
-                    {/* Mobile Plus Button */}
-                    <Button size="sm" variant="outline" className="md:hidden text-primary border-primary font-bold hover:text-primary hover:bg-primary/10 gap-1 px-2" onClick={() => setIsListingDialogOpen(true)}>
-                        <Plus className="h-4 w-4" />
-                        Add item
-                    </Button>
+                    {/* Mobile Actions */}
+                    <div className="flex items-center gap-2 md:hidden">
+                        <Button size="sm" variant="outline" className="text-primary border-primary font-bold hover:text-primary hover:bg-primary/10 gap-1 px-2" onClick={() => setIsListingDialogOpen(true)}>
+                            <Plus className="h-4 w-4" />
+                            Add item
+                        </Button>
+                        <NotificationBell />
+                    </div>
                     
                     {/* Desktop items */}
                     <div className="hidden md:flex items-center gap-2">
