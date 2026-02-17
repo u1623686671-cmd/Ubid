@@ -188,15 +188,33 @@ export default function ProfilePage() {
 
                 <div className="grid grid-cols-2 gap-4">
                     <Link href="/my-bids">
-                        <Card className="p-4 flex flex-col items-center justify-center text-center hover:bg-muted/50 transition-colors h-full shadow-sm">
-                            <Gavel className="w-8 h-8 text-primary mb-2"/>
-                            <p className="font-semibold">My Bids</p>
+                        <Card className="overflow-hidden shadow-lg border-0 hover:shadow-xl-accent transition-all duration-300 group">
+                            <div className="h-16 bg-gradient-to-br from-primary/10 via-card to-secondary" />
+                            <div className="relative p-4 pt-0">
+                                <div className="flex justify-center -mt-8">
+                                    <div className="w-16 h-16 rounded-full border-4 border-background bg-card flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <Gavel className="w-8 h-8 text-primary"/>
+                                    </div>
+                                </div>
+                                <div className="text-center mt-3">
+                                    <p className="font-semibold text-lg">My Bids</p>
+                                </div>
+                            </div>
                         </Card>
                     </Link>
                     <Link href="/retailer/dashboard">
-                        <Card className="p-4 flex flex-col items-center justify-center text-center hover:bg-muted/50 transition-colors h-full shadow-sm">
-                            <Package className="w-8 h-8 text-primary mb-2"/>
-                            <p className="font-semibold">My Listings</p>
+                        <Card className="overflow-hidden shadow-lg border-0 hover:shadow-xl-accent transition-all duration-300 group">
+                            <div className="h-16 bg-gradient-to-tl from-primary/10 via-card to-secondary" />
+                            <div className="relative p-4 pt-0">
+                                <div className="flex justify-center -mt-8">
+                                    <div className="w-16 h-16 rounded-full border-4 border-background bg-card flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <Package className="w-8 h-8 text-primary"/>
+                                    </div>
+                                </div>
+                                <div className="text-center mt-3">
+                                    <p className="font-semibold text-lg">My Listings</p>
+                                </div>
+                            </div>
                         </Card>
                     </Link>
                 </div>
