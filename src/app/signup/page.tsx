@@ -187,6 +187,12 @@ export default function SignupPage() {
             )} />
         </div>
         
+        <div className="-mt-2">
+            <FormDescription>
+                We'll use your first name as your username. This can’t be edited later!
+            </FormDescription>
+        </div>
+        
         <FormField control={form.control} name="phoneNumber" render={({ field }) => (
             <FormItem>
                 <FormLabel>Phone Number</FormLabel>
