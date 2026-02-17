@@ -239,15 +239,10 @@ export default function ProfilePage() {
                 <Card className="overflow-hidden shadow-lg border-0">
                     <div className="h-24 bg-gradient-to-r from-primary to-accent" />
                     <div className="relative p-6 pt-0">
-                        <div className="flex justify-center -mt-12">
-                            <div {...getRootProps()} className="relative w-24 h-24 rounded-full cursor-pointer group">
-                                <input {...getInputProps()} />
-                                <Avatar className="w-24 h-24 border-4 border-background">
-                                    <AvatarImage src={userProfile?.photoURL || user.photoURL!} className="object-cover" />
-                                    <AvatarFallback className="text-3xl">{user.displayName ? getInitials(user.displayName) : 'U'}</AvatarFallback>
-                                </Avatar>
+                        <div className="flex items-center -mt-12">
+                            <div className="flex-1 flex justify-center">
                                 {(userProfile?.isUltimateUser || userProfile?.isPlusUser) && (
-                                    <div className="absolute top-0 right-0">
+                                    <div>
                                         {userProfile.isUltimateUser ? (
                                             <Badge className="bg-purple-500 text-white hover:bg-purple-500 border-2 border-background">ULTIMATE</Badge>
                                         ) : userProfile.isPlusUser ? (
@@ -255,6 +250,12 @@ export default function ProfilePage() {
                                         ) : null}
                                     </div>
                                 )}
+                            </div>
+                            <div {...getRootProps()} className="relative w-24 h-24 rounded-full cursor-pointer group flex-shrink-0">
+                                <Avatar className="w-24 h-24 border-4 border-background">
+                                    <AvatarImage src={userProfile?.photoURL || user.photoURL!} className="object-cover" />
+                                    <AvatarFallback className="text-3xl">{user.displayName ? getInitials(user.displayName) : 'U'}</AvatarFallback>
+                                </Avatar>
                                 <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                     {isUploading ? (
                                         <Loader2 className="w-8 h-8 animate-spin" />
@@ -266,6 +267,7 @@ export default function ProfilePage() {
                                     )}
                                 </div>
                             </div>
+                            <div className="flex-1" />
                         </div>
                         <div className="text-center mt-4">
                             <h2 className="text-xl font-semibold">{userProfile?.firstName || "User"}</h2>
