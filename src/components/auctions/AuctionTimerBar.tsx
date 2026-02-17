@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -108,12 +107,14 @@ export function AuctionTimerBar({ startDate, endDate, isCard = false }: AuctionT
   }
 
   if (isCard) {
-    const displayText = isEnded ? 'Auction Ended' : (isUpcoming ? `Starts in ${timeLeft}` : `Ends in ${timeLeft}`);
+    const prefix = isEnded ? 'Auction' : (isUpcoming ? `Starts in` : `Ends in`);
+    const timeValue = isEnded ? 'Ended' : timeLeft;
     return (
-      <div className="w-full flex items-center gap-1.5 justify-start text-xs h-6">
-          <Clock className="w-3.5 h-3.5" />
-          <span className={cn("font-medium font-mono tracking-tighter", textColor)}>
-              {displayText}
+      <div className="w-full flex items-baseline gap-1.5 justify-start text-xs h-6">
+          <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="text-muted-foreground">{prefix}</span>
+          <span className={cn("font-bold text-sm font-mono tracking-tight", textColor)}>
+              {timeValue}
           </span>
       </div>
     );
