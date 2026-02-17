@@ -690,56 +690,54 @@ export default function HomePage() {
             })}
             {items.length > 12 && viewAllLink && (
                 <div key="view-all" className="w-[45vw] sm:w-48 shrink-0">
-                    <Link href={viewAllLink} className="h-full block group">
-                        <Card className="h-full flex flex-col overflow-hidden shadow-lg hover:bg-muted/50 transition-colors border-0">
-                            <CardContent className="flex-grow flex flex-col justify-center items-center">
-                                <div className="relative w-full aspect-square flex items-center justify-center p-4">
-                                    {items.slice(0, 3).reverse().map((item, index) => {
-                                        const collectionName = item.category;
-                                        const isPlate = collectionName === 'plates';
-                                        const isPhoneNumber = collectionName === 'phoneNumbers';
-                                        let imageUrl = '';
-                                        if (!isPlate && !isPhoneNumber) {
-                                            imageUrl = (item.imageUrls && item.imageUrls[0]) || `https://picsum.photos/seed/${item.id}/200/200`;
-                                        }
+                    <Link href={viewAllLink} className="h-full flex flex-col group p-3 justify-between">
+                        <div className="flex-grow flex flex-col justify-center items-center">
+                            <div className="relative w-full aspect-square flex items-center justify-center p-4">
+                                {items.slice(0, 3).reverse().map((item, index) => {
+                                    const collectionName = item.category;
+                                    const isPlate = collectionName === 'plates';
+                                    const isPhoneNumber = collectionName === 'phoneNumbers';
+                                    let imageUrl = '';
+                                    if (!isPlate && !isPhoneNumber) {
+                                        imageUrl = (item.imageUrls && item.imageUrls[0]) || `https://picsum.photos/seed/${item.id}/200/200`;
+                                    }
 
-                                        return (
-                                            <div
-                                                key={item.id}
-                                                className="absolute w-2/3 aspect-square rounded-md overflow-hidden bg-muted border transition-transform duration-300 ease-in-out group-hover:rotate-0"
-                                                style={{
-                                                    transform: `rotate(${index * 8 - 8}deg)`,
-                                                    zIndex: 3 - index,
-                                                }}
-                                            >
-                                                {isPlate ? (
-                                                    <div className="flex items-center justify-center h-full">
-                                                        <LebanesePlateDisplay plateNumber={item.itemName} />
-                                                    </div>
-                                                ) : isPhoneNumber ? (
-                                                    <div className="flex items-center justify-center h-full">
-                                                        <PhoneNumberDisplay phoneNumber={item.itemName} size="small" />
-                                                    </div>
-                                                ) : (
-                                                    <Image
-                                                        src={imageUrl}
-                                                        alt="" // Decorative
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </CardContent>
-                             <CardFooter className="p-3">
-                                <div className="flex flex-row items-center justify-center text-center gap-1 w-full">
-                                    <p className="font-semibold text-base">See More</p>
-                                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                                </div>
-                            </CardFooter>
-                        </Card>
+                                    return (
+                                        <div
+                                            key={item.id}
+                                            className="absolute w-2/3 aspect-square rounded-md overflow-hidden bg-muted border transition-transform duration-300 ease-in-out group-hover:rotate-0"
+                                            style={{
+                                                transform: `rotate(${index * 8 - 8}deg)`,
+                                                zIndex: 3 - index,
+                                            }}
+                                        >
+                                            {isPlate ? (
+                                                <div className="flex items-center justify-center h-full">
+                                                    <LebanesePlateDisplay plateNumber={item.itemName} />
+                                                </div>
+                                            ) : isPhoneNumber ? (
+                                                <div className="flex items-center justify-center h-full">
+                                                    <PhoneNumberDisplay phoneNumber={item.itemName} size="small" />
+                                                </div>
+                                            ) : (
+                                                <Image
+                                                    src={imageUrl}
+                                                    alt="" // Decorative
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                        <div className="p-3">
+                            <div className="flex flex-row items-center justify-center text-center gap-1 w-full">
+                                <p className="font-semibold text-base">See More</p>
+                                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                        </div>
                     </Link>
                 </div>
             )}
