@@ -200,22 +200,29 @@ export default function BillingPage() {
                         pendingSubscriptionBillingCycle: null,
                         pendingSubscriptionEffectiveDate: null,
                     };
+                    
+                    const currentPromoTokens = userDoc.data().promotionTokens || 0;
+                    const currentExtendTokens = userDoc.data().extendTokens || 0;
     
                     if (plan === 'plus') {
                         updateData.isPlusUser = true;
                         updateData.isUltimateUser = false;
+                        if (billingCycle === 'monthly') {
+                            updateData.promotionTokens = currentPromoTokens + 1;
+                        } else { // yearly
+                            updateData.promotionTokens = currentPromoTokens + 12;
+                        }
+
                     } else if (plan === 'ultimate') {
                         updateData.isPlusUser = false;
                         updateData.isUltimateUser = true;
-                        const currentPromoTokens = userDoc.data().promotionTokens || 0;
-                        const currentExtendTokens = userDoc.data().extendTokens || 0;
-
+                        
                         if (billingCycle === 'monthly') {
                             updateData.promotionTokens = currentPromoTokens + 5;
-                            updateData.extendTokens = currentExtendTokens + 2;
+                            updateData.extendTokens = currentExtendTokens + 10;
                         } else { // yearly
                             updateData.promotionTokens = currentPromoTokens + 60; // 5 * 12
-                            updateData.extendTokens = currentExtendTokens + 24; // 2 * 12
+                            updateData.extendTokens = currentExtendTokens + 120; // 10 * 12
                         }
                     }
     

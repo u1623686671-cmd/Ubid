@@ -259,7 +259,7 @@ export default function MyListingsPage() {
         const itemRef = doc(firestore, listing.category, listing.id);
 
         try {
-            const hasFreePromotion = userProfile.isUltimateUser && (userProfile.promotionTokens || 0) > 0;
+            const hasFreePromotion = (userProfile.isPlusUser || userProfile.isUltimateUser) && (userProfile.promotionTokens || 0) > 0;
 
             if (hasFreePromotion) {
                 // Use a free token
@@ -360,7 +360,7 @@ export default function MyListingsPage() {
                     const canExtend = (userProfile?.extendTokens || 0) > 0 && extendCount < 3;
                     const tokensLeft = userProfile?.extendTokens || 0;
                     const isBoosting = boostingItemId === listing.id;
-                    const hasFreePromotion = userProfile?.isUltimateUser && (userProfile?.promotionTokens || 0) > 0;
+                    const hasFreePromotion = (userProfile?.isPlusUser || userProfile?.isUltimateUser) && (userProfile?.promotionTokens || 0) > 0;
                     const promoTokensLeft = userProfile?.promotionTokens || 0;
 
                     return (

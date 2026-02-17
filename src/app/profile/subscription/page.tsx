@@ -64,7 +64,7 @@ export default function SubscriptionPage() {
   const ultimateFeatures = [
     "Everything in Plus",
     "5 Promoted Listings per Month",
-    "2 Extend Tokens per Month",
+    "10 Extend Tokens per Month",
     "Priority Support",
   ];
 
