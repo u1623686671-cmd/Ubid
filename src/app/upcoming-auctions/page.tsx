@@ -197,7 +197,7 @@ export default function UpcomingAuctionsPage() {
                 const status = getStatus();
                 
                 return (
-                    <Card key={item.id} onClick={() => handleItemSelect({ id: item.id, category: collectionName })} className={cn("shadow-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors", !item.isPromoted && 'overflow-hidden', item.isPromoted && "ring-2 ring-accent bg-accent/10")}>
+                    <Card key={item.id} onClick={() => handleItemSelect({ id: item.id, category: collectionName })} className="shadow-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors overflow-hidden">
                         <CardContent className="p-4 pb-0">
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <div className="w-full sm:w-24 shrink-0">

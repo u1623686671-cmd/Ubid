@@ -124,7 +124,7 @@ function WatchlistItemCard({ item }: { item: WatchlistItem }) {
                     </ScrollArea>
                 </DialogContent>
             </Dialog>
-        <Card onClick={() => handleItemSelect({ id: item.id, category: item.category })} className={cn("shadow-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors", !liveItemData.isPromoted && "overflow-hidden", liveItemData.isPromoted && "ring-2 ring-accent bg-accent/10")}>
+        <Card onClick={() => handleItemSelect({ id: item.id, category: item.category })} className="shadow-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors overflow-hidden">
             <CardContent className="p-4 pb-0">
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="w-full sm:w-24 shrink-0">

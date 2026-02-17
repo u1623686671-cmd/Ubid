@@ -286,9 +286,7 @@ export function MyBidItemCard({ item, onStatusUpdate, onItemSelect, className }:
 
     return (
         <Card onClick={onItemSelect} className={cn(
-            "shadow-lg bg-card cursor-pointer",
-            !isPromoted && "overflow-hidden",
-            isPromoted && "ring-2 ring-accent bg-accent/10",
+            "shadow-lg bg-card cursor-pointer overflow-hidden",
             className
         )}>
             <CardContent className="p-4 pb-0">
@@ -297,7 +295,7 @@ export function MyBidItemCard({ item, onStatusUpdate, onItemSelect, className }:
                         {isPlate || isPhoneNumber ? (
                             <div className={cn(
                                 "relative rounded-md group bg-muted aspect-square flex items-center justify-center",
-                                !isPromoted && "overflow-hidden"
+                                "overflow-hidden"
                             )}>
                                 {isPlate ? (
                                     <LebanesePlateDisplay plateNumber={item.itemTitle} />
@@ -308,7 +306,7 @@ export function MyBidItemCard({ item, onStatusUpdate, onItemSelect, className }:
                         ) : (
                             <div className={cn(
                                 "aspect-square relative rounded-md group",
-                                !isPromoted && "overflow-hidden"
+                                "overflow-hidden"
                             )}>
                                 <Image
                                     src={item.itemImageUrl}
