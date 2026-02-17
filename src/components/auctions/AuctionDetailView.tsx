@@ -243,37 +243,40 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
               <div className="space-y-6">
                   <Card>
                       <CardHeader>
-                      <CardTitle className="flex items-center gap-2"><Gavel /><span>Bidding</span></CardTitle>
-                      <CardDescription>
-                          {status === 'completed' ? `The final bid was $${item.currentBid.toLocaleString()}.` : `The current highest bid is $${item.currentBid.toLocaleString()}.`}
-                      </CardDescription>
+                        <CardTitle className="flex items-center gap-2"><Gavel /><span>Bidding</span></CardTitle>
+                        <CardDescription>
+                            {status === 'completed' ? 'The final bid was:' : status === 'live' ? 'The current bid is:' : 'The starting bid is:'}
+                        </CardDescription>
                       </CardHeader>
                       <CardContent>
-                      {status === 'live' ? (
-                          <BiddingForm
-                          itemId={itemId}
-                          category={category as any}
-                          currentBid={item.currentBid}
-                          minimumBidIncrement={item.minimumBidIncrement}
-                          itemUserId={item.userId}
-                          isFlashAuction={item.isFlashAuction}
-                          auctionEndDate={item.auctionEndDate}
-                          />
-                      ) : status === 'upcoming' ? (
-                          <div className="text-center text-muted-foreground py-4 space-y-1">
-                          <p className="font-semibold text-lg text-foreground">Auction Starts Soon</p>
-                          <div className="text-sm">
-                              Bidding begins {formatDistanceToNow(auctionStartDate, { addSuffix: true })}
-                          </div>
-                          </div>
-                      ) : (
-                          <div className="text-center text-muted-foreground py-4 space-y-1">
-                          <p className="font-semibold text-lg">Auction Ended</p>
-                          <div className="text-sm">
-                              This auction ended {formatDistanceToNow(auctionEndDate, { addSuffix: true })}
-                          </div>
-                          </div>
-                      )}
+                        <div className="p-4 mb-4 rounded-lg bg-muted text-center">
+                            <p className="text-4xl font-bold">${(status === 'upcoming' ? item.startingBid : item.currentBid).toLocaleString()}</p>
+                        </div>
+                        {status === 'live' ? (
+                            <BiddingForm
+                            itemId={itemId}
+                            category={category as any}
+                            currentBid={item.currentBid}
+                            minimumBidIncrement={item.minimumBidIncrement}
+                            itemUserId={item.userId}
+                            isFlashAuction={item.isFlashAuction}
+                            auctionEndDate={item.auctionEndDate}
+                            />
+                        ) : status === 'upcoming' ? (
+                            <div className="text-center text-muted-foreground py-4 space-y-1">
+                                <p className="font-semibold text-lg text-foreground">Auction Starts Soon</p>
+                                <div className="text-sm">
+                                    Bidding begins {formatDistanceToNow(auctionStartDate, { addSuffix: true })}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center text-muted-foreground py-4 space-y-1">
+                                <p className="font-semibold text-lg">Auction Ended</p>
+                                <div className="text-sm">
+                                    This auction ended {formatDistanceToNow(auctionEndDate, { addSuffix: true })}
+                                </div>
+                            </div>
+                        )}
                       </CardContent>
                   </Card>
                   {renderAIValuation()}
