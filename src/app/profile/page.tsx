@@ -306,9 +306,9 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4 px-8">
+                <div className="grid grid-cols-2 gap-4">
                     <Link href="/my-bids">
-                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group aspect-square rounded-full">
+                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-36">
                             <CardContent className="pt-6 flex flex-col items-center justify-center text-center h-full">
                                 <Gavel className="w-6 h-6 text-primary mb-2" />
                                 <p className="font-semibold text-base">My Bids</p>
@@ -316,7 +316,7 @@ export default function ProfilePage() {
                         </Card>
                     </Link>
                     <Link href="/retailer/dashboard">
-                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group aspect-square rounded-full">
+                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-36">
                             <CardContent className="pt-6 flex flex-col items-center justify-center text-center h-full">
                                 <Package className="w-6 h-6 text-primary mb-2" />
                                 <p className="font-semibold text-base">My Listings</p>
@@ -370,3 +370,5 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+    
