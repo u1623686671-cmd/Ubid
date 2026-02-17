@@ -71,8 +71,8 @@ const legalNavItems = [
     },
 ];
 
-// Helper function to resize the image
-const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<string> => {
+// Helper function to resize and crop the image to a square
+const resizeImage = (file: File, size: number): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -82,28 +82,23 @@ const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<s
       const img = new window.Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        let { width, height } = img;
-
-        if (width > height) {
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = Math.round((width * maxHeight) / height);
-            height = maxHeight;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = size;
+        canvas.height = size;
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           return reject(new Error('Could not get canvas context'));
         }
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG with quality 0.8
+
+        // Crop the image to a square from the center
+        const sourceWidth = img.width;
+        const sourceHeight = img.height;
+        const sourceSize = Math.min(sourceWidth, sourceHeight);
+        const sourceX = (sourceWidth - sourceSize) / 2;
+        const sourceY = (sourceHeight - sourceSize) / 2;
+        
+        ctx.drawImage(img, sourceX, sourceY, sourceSize, sourceSize, 0, 0, size, size);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9); // Use JPEG with higher quality
         resolve(dataUrl);
       };
       img.onerror = (error) => reject(error);
@@ -155,18 +150,15 @@ export default function ProfilePage() {
             if (isHeic) {
                 toast({ title: 'Converting HEIC image...', description: 'This may take a moment.' });
                 const heic2any = (await import('heic2any')).default;
-                const conversionResult = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.8 });
+                const conversionResult = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
                 const convertedBlob = Array.isArray(conversionResult) ? conversionResult[0] : conversionResult;
                 if (!convertedBlob) throw new Error("HEIC conversion failed.");
                 const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpeg');
                 fileToProcess = new File([convertedBlob], newFileName, { type: 'image/jpeg' });
             }
 
-            const resizedDataUrl = await resizeImage(fileToProcess, 256, 256);
+            const resizedDataUrl = await resizeImage(fileToProcess, 256);
 
-            // The updateProfile call can be too restrictive on data URL length.
-            // Since the app prioritizes the Firestore photoURL anyway, we can rely solely on that.
-            // await updateProfile(auth.currentUser, { photoURL: resizedDataUrl });
             await updateDoc(userProfileRef, { photoURL: resizedDataUrl });
 
             toast({
@@ -190,7 +182,7 @@ export default function ProfilePage() {
         onDrop,
         accept: { 'image/*': ['.jpeg', '.png', '.jpg', '.webp', '.heic', '.heif'] },
         multiple: false,
-        maxSize: 5 * 1024 * 1024, // 5MB
+        maxSize: 5 * 1024 * 1024,
         onDropRejected: (fileRejections) => {
             fileRejections.forEach(({ file, errors }) => {
                 errors.forEach(error => {
@@ -371,3 +363,4 @@ export default function ProfilePage() {
         </div>
     );
 }
+    
