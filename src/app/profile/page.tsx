@@ -138,7 +138,7 @@ export default function ProfilePage() {
 
       const onDrop = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles.length === 0) return;
-        if (!user || !auth.currentUser || !userProfileRef) return;
+        if (!user || !userProfileRef) return;
 
         const file = acceptedFiles[0];
         setIsUploading(true);
@@ -157,7 +157,7 @@ export default function ProfilePage() {
                 fileToProcess = new File([convertedBlob], newFileName, { type: 'image/jpeg' });
             }
 
-            const resizedDataUrl = await resizeImage(fileToProcess, 256);
+            const resizedDataUrl = await resizeImage(fileToProcess, 512);
 
             await updateDoc(userProfileRef, { photoURL: resizedDataUrl });
 
@@ -176,18 +176,18 @@ export default function ProfilePage() {
         } finally {
             setIsUploading(false);
         }
-    }, [user, auth, userProfileRef, toast]);
+    }, [user, userProfileRef, toast]);
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
         accept: { 'image/*': ['.jpeg', '.png', '.jpg', '.webp', '.heic', '.heif'] },
         multiple: false,
-        maxSize: 5 * 1024 * 1024,
+        maxSize: 10 * 1024 * 1024,
         onDropRejected: (fileRejections) => {
             fileRejections.forEach(({ file, errors }) => {
                 errors.forEach(error => {
                     if (error.code === 'file-too-large') {
-                        toast({ variant: 'destructive', title: `File too large: ${file.name}`, description: 'Please upload images under 5MB.' });
+                        toast({ variant: 'destructive', title: `File too large: ${file.name}`, description: 'Please upload images under 10MB.' });
                     } else if (error.code === 'file-invalid-type') {
                         toast({ variant: 'destructive', title: `Invalid file type: ${file.name}`, description: 'Please upload a valid image file (jpeg, png, heic, etc.).' });
                     } else {
@@ -242,11 +242,11 @@ export default function ProfilePage() {
                             <div {...getRootProps()} className="relative w-24 h-24 rounded-full cursor-pointer group">
                                 <input {...getInputProps()} />
                                 <Avatar className="w-24 h-24 border-4 border-background">
-                                    {(userProfile?.photoURL || user.photoURL) && <AvatarImage src={userProfile?.photoURL || user.photoURL!} data-ai-hint="person face" />}
+                                    <AvatarImage src={userProfile?.photoURL || user.photoURL!} className="object-cover" />
                                     <AvatarFallback className="text-3xl">{user.displayName ? getInitials(user.displayName) : 'U'}</AvatarFallback>
                                 </Avatar>
                                 {(userProfile?.isUltimateUser || userProfile?.isPlusUser) && (
-                                    <div className="absolute top-0 right-0 -translate-y-1 -translate-x-1">
+                                    <div className="absolute top-0 right-0">
                                         {userProfile.isUltimateUser ? (
                                             <Badge className="bg-purple-500 text-white hover:bg-purple-500 border-2 border-background">ULTIMATE</Badge>
                                         ) : userProfile.isPlusUser ? (
@@ -301,7 +301,7 @@ export default function ProfilePage() {
 
                 <div className="grid grid-cols-2 gap-4">
                     <Link href="/my-bids">
-                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-36">
+                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-36 flex flex-col items-center justify-center rounded-2xl">
                             <CardContent className="pt-6 flex flex-col items-center justify-center text-center h-full">
                                 <Gavel className="w-6 h-6 text-primary mb-2" />
                                 <p className="font-semibold text-base">My Bids</p>
@@ -309,7 +309,7 @@ export default function ProfilePage() {
                         </Card>
                     </Link>
                     <Link href="/retailer/dashboard">
-                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-36">
+                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-36 flex flex-col items-center justify-center rounded-2xl">
                             <CardContent className="pt-6 flex flex-col items-center justify-center text-center h-full">
                                 <Package className="w-6 h-6 text-primary mb-2" />
                                 <p className="font-semibold text-base">My Listings</p>
