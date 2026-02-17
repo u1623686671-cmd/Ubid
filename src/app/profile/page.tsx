@@ -224,10 +224,6 @@ export default function ProfilePage() {
 
     return (
         <div className="container mx-auto max-w-2xl px-4 py-12 md:py-16">
-             {isMobile && !isProfilePage && (
-              <div className="fixed top-0 left-0 right-0 z-30 bg-card border-b h-16 flex items-center justify-end px-4">
-              </div>
-            )}
             <header className="mb-12">
                 <h1 className="text-4xl md:text-5xl font-bold font-headline mb-2">
                     Profile
@@ -240,13 +236,13 @@ export default function ProfilePage() {
                 <Card className="overflow-hidden shadow-lg border-0">
                     <div className="h-24 bg-gradient-to-r from-primary to-accent" />
                     <div className="relative p-6 pt-0">
-                        {isMobile && !isProfilePage && (
-                            <div className="absolute top-2 right-6">
+                        {isMobile && (
+                            <div className="absolute top-2 right-2">
                                 <NotificationBell />
                             </div>
                         )}
                         <div className="flex items-center -mt-12">
-                            <div className="flex-1 flex justify-center items-center">
+                             <div className="flex-1 flex justify-center items-center">
                                 {(userProfile?.isUltimateUser || userProfile?.isPlusUser) && (
                                     <>
                                         {userProfile.isUltimateUser ? (
