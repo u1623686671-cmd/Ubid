@@ -163,7 +163,7 @@ export default function ProfilePage() {
                 fileToProcess = new File([convertedBlob], newFileName, { type: 'image/jpeg' });
             }
 
-            const resizedDataUrl = await resizeImage(fileToProcess, 256, 256);
+            const resizedDataUrl = await resizeImage(fileToProcess, 128, 128);
 
             await updateProfile(auth.currentUser, { photoURL: resizedDataUrl });
             await updateDoc(userProfileRef, { photoURL: resizedDataUrl });
@@ -189,12 +189,12 @@ export default function ProfilePage() {
         onDrop,
         accept: { 'image/*': ['.jpeg', '.png', '.jpg', '.webp', '.heic', '.heif'] },
         multiple: false,
-        maxSize: 10 * 1024 * 1024, // 10MB
+        maxSize: 5 * 1024 * 1024, // 5MB
         onDropRejected: (fileRejections) => {
             fileRejections.forEach(({ file, errors }) => {
                 errors.forEach(error => {
                     if (error.code === 'file-too-large') {
-                        toast({ variant: 'destructive', title: `File too large: ${file.name}`, description: 'Please upload images under 10MB.' });
+                        toast({ variant: 'destructive', title: `File too large: ${file.name}`, description: 'Please upload images under 5MB.' });
                     } else if (error.code === 'file-invalid-type') {
                         toast({ variant: 'destructive', title: `Invalid file type: ${file.name}`, description: 'Please upload a valid image file (jpeg, png, heic, etc.).' });
                     } else {
@@ -370,5 +370,7 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+    
 
     
