@@ -14,7 +14,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Badge } from '@/components/ui/badge';
 import Loading from './loading';
 import { Separator } from '@/components/ui/separator';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 
 const accountNavItems = [
@@ -188,33 +188,19 @@ export default function ProfilePage() {
 
                 <div className="grid grid-cols-2 gap-4">
                     <Link href="/my-bids">
-                        <Card className="overflow-hidden shadow-lg border-0 hover:shadow-xl-accent transition-all duration-300 group">
-                            <div className="h-16 bg-gradient-to-br from-primary/10 via-card to-secondary" />
-                            <div className="relative p-4 pt-0">
-                                <div className="flex justify-center -mt-8">
-                                    <div className="w-16 h-16 rounded-full border-4 border-background bg-card flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <Gavel className="w-8 h-8 text-primary"/>
-                                    </div>
-                                </div>
-                                <div className="text-center mt-3">
-                                    <p className="font-semibold text-lg">My Bids</p>
-                                </div>
-                            </div>
+                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-full">
+                           <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
+                                <Gavel className="w-8 h-8 text-primary mb-4"/>
+                                <p className="font-semibold text-lg">My Bids</p>
+                            </CardContent>
                         </Card>
                     </Link>
                     <Link href="/retailer/dashboard">
-                        <Card className="overflow-hidden shadow-lg border-0 hover:shadow-xl-accent transition-all duration-300 group">
-                            <div className="h-16 bg-gradient-to-tl from-primary/10 via-card to-secondary" />
-                            <div className="relative p-4 pt-0">
-                                <div className="flex justify-center -mt-8">
-                                    <div className="w-16 h-16 rounded-full border-4 border-background bg-card flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <Package className="w-8 h-8 text-primary"/>
-                                    </div>
-                                </div>
-                                <div className="text-center mt-3">
-                                    <p className="font-semibold text-lg">My Listings</p>
-                                </div>
-                            </div>
+                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-full">
+                             <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
+                                <Package className="w-8 h-8 text-primary mb-4"/>
+                                <p className="font-semibold text-lg">My Listings</p>
+                            </CardContent>
                         </Card>
                     </Link>
                 </div>
