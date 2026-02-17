@@ -455,7 +455,7 @@ export default function HomePage() {
                 }
 
                 return (
-                    <Card key={item.id} onClick={() => handleItemSelect({ id: item.id, category: collectionName })} className={cn("w-[45vw] sm:w-48 shrink-0 flex flex-col cursor-pointer group h-full overflow-hidden shadow-lg hover:bg-muted/50 transition-colors", item.isPromoted && "ring-2 ring-offset-background ring-primary")}>
+                    <Card key={item.id} onClick={() => handleItemSelect({ id: item.id, category: collectionName })} className={cn("w-[45vw] sm:w-48 shrink-0 flex flex-col cursor-pointer group h-full overflow-hidden shadow-lg hover:bg-muted/50 transition-colors", item.isPromoted && "ring-2 ring-offset-background ring-sky-500 shadow-xl shadow-sky-500/50")}>
                         <CardContent className="p-0">
                            <div className={cn("relative group/image overflow-hidden flex items-center justify-center", 'aspect-square', isPlate || isPhoneNumber ? '' : 'bg-muted')}>
                                 {isPlate ? (
