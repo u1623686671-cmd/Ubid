@@ -83,36 +83,32 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
 
   // Effect to log user view for personalization and increment view count
   useEffect(() => {
-    if (!user || !firestore || !itemRef || isItemLoading || !item) {
-        return;
+    // Guard against running on server, or when data is not ready.
+    if (typeof window === 'undefined' || !user || !firestore || !itemRef || isItemLoading || !item) {
+      return;
     }
 
-    // --- NEW View Counting Logic using sessionStorage ---
-    try {
-        const viewedItemsKey = 'ubid_viewed_items_session';
-        const viewedItemsJSON = sessionStorage.getItem(viewedItemsKey);
-        const viewedItems = new Set<string>(viewedItemsJSON ? JSON.parse(viewedItemsJSON) : []);
+    const sessionViewKey = `viewed-${itemId}`;
 
-        if (!viewedItems.has(itemId)) {
-            // Not viewed in this session, so increment count
-            updateDoc(itemRef, {
-                viewCount: increment(1)
-            }).catch(err => {
-                const permissionError = new FirestorePermissionError({
-                    path: itemRef.path,
-                    operation: 'update',
-                    requestResourceData: { viewCount: 'increment(1)' }
-                });
-                errorEmitter.emit('permission-error', permissionError);
-            });
+    // 1. Check session storage to see if this item has already been viewed.
+    if (!sessionStorage.getItem(sessionViewKey)) {
+      // 2. If not viewed, mark it as viewed immediately to prevent retries.
+      sessionStorage.setItem(sessionViewKey, 'true');
 
-            // Add to the set and save back to sessionStorage
-            viewedItems.add(itemId);
-            sessionStorage.setItem(viewedItemsKey, JSON.stringify(Array.from(viewedItems)));
-        }
-    } catch (e) {
-        console.error("Could not update view count using sessionStorage:", e);
-        // Fallback or just log, to not break the page
+      // 3. Then, perform the database update.
+      updateDoc(itemRef, {
+        viewCount: increment(1),
+      }).catch((err) => {
+        // This is a non-critical background task. We report it for debugging
+        // but don't disrupt the user. If this fails, the sessionStorage flag
+        // will prevent further attempts in this session anyway.
+        const permissionError = new FirestorePermissionError({
+          path: itemRef.path,
+          operation: 'update',
+          requestResourceData: { viewCount: 'increment(1)' },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
     }
       
     // --- Log for immediate client-side suggestions (still uses localStorage) ---
