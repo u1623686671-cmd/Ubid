@@ -691,7 +691,7 @@ export default function HomePage() {
             {items.length > 12 && viewAllLink && (
                 <div key="view-all" className="w-[45vw] sm:w-48 shrink-0">
                     <Link href={viewAllLink} className="h-full block group">
-                        <Card className="h-full flex flex-col overflow-hidden shadow-lg hover:bg-muted/50 transition-colors">
+                        <Card className="h-full flex flex-col overflow-hidden shadow-lg hover:bg-muted/50 transition-colors border-0">
                             <CardContent className="flex-grow flex flex-col justify-center items-center">
                                 <div className="relative w-full aspect-square flex items-center justify-center p-4">
                                     {items.slice(0, 3).reverse().map((item, index) => {
