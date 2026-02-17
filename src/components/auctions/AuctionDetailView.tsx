@@ -81,26 +81,26 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
   const userProfileRef = useMemoFirebase(() => user ? doc(firestore, 'users', user.uid) : null, [firestore, user]);
   const { data: userProfile, isLoading: isUserProfileLoading } = useDoc(userProfileRef);
 
-  // Effect to log user view for personalization and increment view count
+  // Effect to increment view count, runs only once per session per item.
   useEffect(() => {
-    // Guard against running on server, or when data is not ready.
-    if (typeof window === 'undefined' || !user || !firestore || !itemRef || isItemLoading || !item) {
+    // Guard against running on server or without necessary data
+    if (typeof window === 'undefined' || !firestore || !itemRef) {
       return;
     }
 
-    const sessionViewKey = `viewed-${itemId}`;
+    const sessionViewKey = `viewed-item-${itemId}`;
+    const hasBeenViewedInSession = sessionStorage.getItem(sessionViewKey);
 
-    // 1. Check session storage to see if this item has already been viewed.
-    if (!sessionStorage.getItem(sessionViewKey)) {
-      // 2. If not viewed, mark it as viewed immediately to prevent retries.
+    if (!hasBeenViewedInSession) {
+      // Mark as viewed immediately to prevent duplicate updates on re-renders
       sessionStorage.setItem(sessionViewKey, 'true');
 
-      // 3. Then, perform the database update.
+      // Perform the database update asynchronously.
       updateDoc(itemRef, {
         viewCount: increment(1),
       }).catch((err) => {
-        // This is a non-critical background task. We report it for debugging
-        // but don't disrupt the user. If this fails, the sessionStorage flag
+        // This is a non-critical background task. We can report it for debugging
+        // but we don't need to show it to the user. The sessionStorage flag
         // will prevent further attempts in this session anyway.
         const permissionError = new FirestorePermissionError({
           path: itemRef.path,
@@ -109,6 +109,13 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
         });
         errorEmitter.emit('permission-error', permissionError);
       });
+    }
+  }, [firestore, itemRef, itemId]); // Minimal dependencies to prevent unnecessary re-runs.
+
+  // Separate effect for personalization logging
+  useEffect(() => {
+    if (typeof window === 'undefined' || !user || !firestore || !category || !itemId) {
+      return;
     }
       
     // --- Log for immediate client-side suggestions (still uses localStorage) ---
@@ -142,7 +149,7 @@ export function AuctionDetailView({ itemId, category }: AuctionDetailViewProps) 
         console.error("Failed to log user interaction:", err);
     });
 
-  }, [user, firestore, itemRef, isItemLoading, item, category, itemId]);
+  }, [user, firestore, category, itemId]); // Dependencies for this specific task
 
 
   if (isItemLoading || isUserLoading || areBidsLoading || isUserProfileLoading || !item) {
