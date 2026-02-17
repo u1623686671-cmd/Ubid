@@ -3,18 +3,22 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Gavel, User, CreditCard, KeyRound, LifeBuoy, LogOut, Package, Shield, ChevronRight, FileText, Info, Coins, PlusCircle, AlertTriangle } from 'lucide-react';
+import { Gavel, User, CreditCard, KeyRound, LifeBuoy, LogOut, Package, Shield, ChevronRight, FileText, Info, Coins, PlusCircle, AlertTriangle, Loader2, Upload } from 'lucide-react';
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { signOut } from 'firebase/auth';
-import { doc } from "firebase/firestore";
+import { signOut, updateProfile } from 'firebase/auth';
+import { doc, updateDoc } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Loading from './loading';
-import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import heic2any from "heic2any";
 
 
 const accountNavItems = [
@@ -63,12 +67,57 @@ const legalNavItems = [
     },
 ];
 
+// Helper function to resize the image
+const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (!event.target?.result) {
+        return reject(new Error("FileReader did not produce a result."));
+      }
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          return reject(new Error('Could not get canvas context'));
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG with quality 0.8
+        resolve(dataUrl);
+      };
+      img.onerror = (error) => reject(error);
+      img.src = event.target.result as string;
+    };
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function ProfilePage() {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
     const auth = useAuth();
     const router = useRouter();
     const isMobile = useIsMobile();
+    const { toast } = useToast();
+    const [isUploading, setIsUploading] = useState(false);
 
     const adminRef = useMemoFirebase(() => {
         if (!firestore || !user) return null;
@@ -87,6 +136,70 @@ export default function ProfilePage() {
           return doc(firestore, 'users', user.uid);
       }, [firestore, user]);
       const { data: userProfile, isLoading: isUserProfileLoading } = useDoc(userProfileRef);
+
+      const onDrop = useCallback(async (acceptedFiles: File[]) => {
+        if (acceptedFiles.length === 0) return;
+        if (!user || !auth.currentUser || !userProfileRef) return;
+
+        const file = acceptedFiles[0];
+        setIsUploading(true);
+
+        try {
+            let fileToProcess = file;
+            const isHeic = file.type === 'image/heic' || file.type === 'image/heif' || /\.heic$/i.test(file.name) || /\.heif$/i.test(file.name);
+
+            if (isHeic) {
+                toast({ title: 'Converting HEIC image...', description: 'This may take a moment.' });
+                const heic2any = (await import('heic2any')).default;
+                const conversionResult = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.8 });
+                const convertedBlob = Array.isArray(conversionResult) ? conversionResult[0] : conversionResult;
+                if (!convertedBlob) throw new Error("HEIC conversion failed.");
+                const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpeg');
+                fileToProcess = new File([convertedBlob], newFileName, { type: 'image/jpeg' });
+            }
+
+            const resizedDataUrl = await resizeImage(fileToProcess, 256, 256);
+
+            await updateProfile(auth.currentUser, { photoURL: resizedDataUrl });
+            await updateDoc(userProfileRef, { photoURL: resizedDataUrl });
+
+            toast({
+                variant: 'success',
+                title: 'Profile Photo Updated!',
+            });
+
+        } catch (error) {
+            console.error("Profile photo upload error:", error);
+            toast({
+                variant: 'destructive',
+                title: 'Upload Failed',
+                description: 'Could not update your profile photo. Please try again with a different image.',
+            });
+        } finally {
+            setIsUploading(false);
+        }
+    }, [user, auth, userProfileRef, toast]);
+
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop,
+        accept: { 'image/*': ['.jpeg', '.png', '.jpg', '.webp', '.heic', '.heif'] },
+        multiple: false,
+        maxSize: 10 * 1024 * 1024, // 10MB
+        onDropRejected: (fileRejections) => {
+            fileRejections.forEach(({ file, errors }) => {
+                errors.forEach(error => {
+                    if (error.code === 'file-too-large') {
+                        toast({ variant: 'destructive', title: `File too large: ${file.name}`, description: 'Please upload images under 10MB.' });
+                    } else if (error.code === 'file-invalid-type') {
+                        toast({ variant: 'destructive', title: `Invalid file type: ${file.name}`, description: 'Please upload a valid image file (jpeg, png, heic, etc.).' });
+                    } else {
+                        toast({ variant: 'destructive', title: `Error with ${file.name}`, description: error.message });
+                    }
+                });
+            });
+        },
+    });
+
 
       const getInitials = (name: string) => {
         if (!name) return 'U';
@@ -128,10 +241,23 @@ export default function ProfilePage() {
                     <div className="h-24 bg-gradient-to-r from-primary/10 via-secondary to-primary/10" />
                     <div className="relative p-6 pt-0">
                         <div className="flex justify-center -mt-12">
-                            <Avatar className="w-24 h-24 border-4 border-background">
-                                {(userProfile?.photoURL || user.photoURL) && <AvatarImage src={userProfile?.photoURL || user.photoURL!} data-ai-hint="person face" />}
-                                <AvatarFallback className="text-3xl">{user.displayName ? getInitials(user.displayName) : 'U'}</AvatarFallback>
-                            </Avatar>
+                            <div {...getRootProps()} className="relative w-24 h-24 rounded-full cursor-pointer group">
+                                <input {...getInputProps()} />
+                                <Avatar className="w-24 h-24 border-4 border-background">
+                                    {(userProfile?.photoURL || user.photoURL) && <AvatarImage src={userProfile?.photoURL || user.photoURL!} data-ai-hint="person face" />}
+                                    <AvatarFallback className="text-3xl">{user.displayName ? getInitials(user.displayName) : 'U'}</AvatarFallback>
+                                </Avatar>
+                                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {isUploading ? (
+                                        <Loader2 className="w-8 h-8 animate-spin" />
+                                    ) : (
+                                        <div className="text-center">
+                                            <Upload className="w-6 h-6 mx-auto" />
+                                            <p className="text-xs font-semibold mt-1">Change</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                         <div className="text-center mt-4">
                             <div className="flex items-center justify-center gap-2">
@@ -188,7 +314,7 @@ export default function ProfilePage() {
 
                 <div className="grid grid-cols-2 gap-4">
                     <Link href="/my-bids">
-                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-full">
+                         <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-full">
                            <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
                                 <Gavel className="w-8 h-8 text-primary mb-4"/>
                                 <p className="font-semibold text-lg">My Bids</p>
@@ -196,7 +322,7 @@ export default function ProfilePage() {
                         </Card>
                     </Link>
                     <Link href="/retailer/dashboard">
-                        <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-full">
+                         <Card className="shadow-lg border-0 hover:bg-muted/50 transition-all duration-300 group h-full">
                              <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
                                 <Package className="w-8 h-8 text-primary mb-4"/>
                                 <p className="font-semibold text-lg">My Listings</p>
@@ -243,3 +369,4 @@ export default function ProfilePage() {
     );
 
     
+}
