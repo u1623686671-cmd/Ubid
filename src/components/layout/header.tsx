@@ -100,7 +100,7 @@ export function Header() {
     <>
       <Dialog open={isListingDialogOpen} onOpenChange={setIsListingDialogOpen}>
           <DialogContent className="p-0 flex flex-col h-full sm:h-auto sm:max-h-[90vh] sm:max-w-3xl">
-              <DialogHeader className="p-4 pb-0 sm:p-6 sm:pb-0 shrink-0">
+              <DialogHeader className="p-4 pb-2 sm:p-6 sm:pb-4 shrink-0">
                   <DialogTitle className="text-2xl font-bold">Create a New Listing</DialogTitle>
                   <DialogDescription>Select a category and fill in the details for your auction.</DialogDescription>
               </DialogHeader>
@@ -168,11 +168,11 @@ export function Header() {
                 <div className="flex items-center gap-2 md:hidden">
                   {!isProfilePage && (
                     <>
+                      <NotificationBell />
                       <Button size="sm" variant="outline" className="text-primary border-primary font-bold hover:text-primary hover:bg-primary/10 gap-1 px-2" onClick={() => setIsListingDialogOpen(true)}>
                           <Plus className="h-4 w-4" />
                           Add item
                       </Button>
-                      <NotificationBell />
                     </>
                   )}
                 </div>
