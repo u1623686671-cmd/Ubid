@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -12,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Loading from './loading';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useToast } from '@/hooks/use-toast';
@@ -236,9 +237,9 @@ export default function ProfilePage() {
                     <div className="h-24 bg-gradient-to-r from-primary to-accent" />
                     <div className="relative p-6 pt-0">
                         <div className="flex items-center -mt-12">
-                             <div className="flex-1 flex justify-center items-center">
-                                {(userProfile?.isUltimateUser || userProfile?.isPlusUser) && (
-                                    <div className="absolute top-1/2 -translate-y-1/2">
+                            <div className="flex-1 flex justify-center items-center">
+                                {isMobile && (userProfile?.isUltimateUser || userProfile?.isPlusUser) && (
+                                    <div>
                                         {userProfile.isUltimateUser ? (
                                             <Badge className="bg-purple-500 text-white hover:bg-purple-500 border-2 border-background">ULTIMATE</Badge>
                                         ) : userProfile.isPlusUser ? (
@@ -248,6 +249,15 @@ export default function ProfilePage() {
                                 )}
                             </div>
                             <div {...getRootProps()} className="relative w-24 h-24 rounded-full cursor-pointer group flex-shrink-0">
+                                {!isMobile && (userProfile?.isUltimateUser || userProfile?.isPlusUser) && (
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+                                        {userProfile.isUltimateUser ? (
+                                            <Badge className="bg-purple-500 text-white hover:bg-purple-500 border-2 border-background">ULTIMATE</Badge>
+                                        ) : userProfile.isPlusUser ? (
+                                            <Badge className="bg-sky-500 text-white hover:bg-sky-500 border-2 border-background">PLUS</Badge>
+                                        ) : null}
+                                    </div>
+                                )}
                                 <Avatar className="w-24 h-24 border-4 border-background">
                                     <AvatarImage src={userProfile?.photoURL || user.photoURL!} className="object-cover" />
                                     <AvatarFallback className="text-3xl">{user.displayName ? getInitials(user.displayName) : 'U'}</AvatarFallback>
@@ -263,9 +273,9 @@ export default function ProfilePage() {
                                     )}
                                 </div>
                             </div>
-                            <div className="flex-1 relative">
+                            <div className="flex-1 flex justify-center items-center">
                                 {isMobile && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
+                                    <div>
                                         <NotificationBell />
                                     </div>
                                 )}
@@ -368,6 +378,4 @@ export default function ProfilePage() {
         </div>
     );
 }
-    
-
     
