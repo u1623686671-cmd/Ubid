@@ -8,9 +8,9 @@ runConfig:
 
 env:
   - variable: STRIPE_API_KEY
-    secret: PRODUCTION_STRIPE_SECRET_KEY
+    secret: STRIPE_API_KEY
   - variable: STRIPE_WEBHOOK_SECRET
-    secret: PRODUCTION_STRIPE_WEBHOOK_SECRET
+    secret: STRIPE_WEBHOOK_SECRET
   - variable: NEXT_PUBLIC_URL
     value: "https://auctionprime.one"
   - variable: STRIPE_PLUS_MONTHLY_ID
@@ -21,5 +21,3 @@ env:
     value: "price_1T4OIbK0UI9TeZnHOJNK9x9j"
   - variable: STRIPE_BOOST_PRICE_ID
     value: "price_1T4OJ7K0UI9TeZnHPKuFevmG"
-
-    
