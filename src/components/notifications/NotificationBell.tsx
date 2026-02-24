@@ -18,6 +18,8 @@ import { useEffect, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Card } from '../ui/card';
 
 type Notification = {
     id: string;
@@ -54,6 +56,8 @@ export function NotificationBell() {
     const firestore = useFirestore();
     const unreadCount = useUnreadNotificationsCount();
     const pathname = usePathname();
+    const [popoverOpen, setPopoverOpen] = useState(false);
+    const [isFullListOpen, setIsFullListOpen] = useState(false);
 
     const notificationsQuery = useMemoFirebase(() => {
         if (!user) return null;
@@ -64,8 +68,15 @@ export function NotificationBell() {
     }, [firestore, user]);
 
     const { data: notifications, isLoading } = useCollection<Notification>(notificationsQuery);
+    
+    const handleMarkOneAsRead = async (notificationId: string) => {
+        if (!user || !firestore) return;
+        const notifRef = doc(firestore, 'users', user.uid, 'notifications', notificationId);
+        await writeBatch(firestore).update(notifRef, { isRead: true }).commit();
+    };
 
-    const handleOpenChange = async (open: boolean) => {
+    const handlePopoverOpenChange = async (open: boolean) => {
+        setPopoverOpen(open);
         if (open && notifications && firestore && user) {
             const unreadNotifications = notifications.filter(n => !n.isRead);
             if (unreadNotifications.length === 0) return;
@@ -78,11 +89,15 @@ export function NotificationBell() {
             await batch.commit().catch(console.error);
         }
     };
-
-    const fromQuery = pathname === '/home' ? '?from=home' : '';
+    
+    const handleViewAllClick = () => {
+        setPopoverOpen(false);
+        setIsFullListOpen(true);
+    };
 
     return (
-        <Popover onOpenChange={handleOpenChange}>
+        <>
+        <Popover open={popoverOpen} onOpenChange={handlePopoverOpenChange}>
             <PopoverTrigger asChild>
                  <Button
                   variant="outline"
@@ -106,8 +121,8 @@ export function NotificationBell() {
                 <div className="grid gap-2">
                     <div className="flex items-center justify-between px-2">
                         <h4 className="font-medium leading-none">Notifications</h4>
-                        <Button asChild variant="link" className="text-xs h-auto p-0">
-                            <Link href={`/notifications${fromQuery}`}>View all</Link>
+                        <Button variant="link" className="text-xs h-auto p-0" onClick={handleViewAllClick}>
+                            View all
                         </Button>
                     </div>
                     {isLoading && (
@@ -149,5 +164,55 @@ export function NotificationBell() {
                 </div>
             </PopoverContent>
         </Popover>
+
+        <Dialog open={isFullListOpen} onOpenChange={setIsFullListOpen}>
+            <DialogContent className="p-0 sm:max-w-md">
+                <DialogHeader className="p-4 pb-2 sm:p-6 sm:pb-2 border-b">
+                    <DialogTitle className="text-xl">All Notifications</DialogTitle>
+                </DialogHeader>
+                <div className="max-h-[80vh] sm:max-h-[70vh] overflow-hidden">
+                    {isLoading && (
+                        <div className="flex justify-center items-center h-48">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        </div>
+                    )}
+                    {!isLoading && (!notifications || notifications.length === 0) && (
+                        <div className="text-center text-sm text-muted-foreground p-8">
+                            <p>You have no notifications.</p>
+                        </div>
+                    )}
+                     {!isLoading && notifications && notifications.length > 0 && (
+                        <ScrollArea className="h-full">
+                            <div className="space-y-2 p-4 sm:p-6">
+                                {notifications.map((notification) => (
+                                    <Link href={notification.link} key={notification.id} onClick={() => { handleMarkOneAsRead(notification.id); setIsFullListOpen(false); }} className="block">
+                                        <Card className={cn(
+                                            "p-4 transition-all hover:shadow-md border-0 shadow-sm",
+                                            !notification.isRead && "bg-secondary"
+                                        )}>
+                                            <div className="flex items-start gap-4">
+                                                {!notification.isRead && <span className="flex h-2.5 w-2.5 translate-y-1.5 rounded-full bg-primary" />}
+                                                <div className="grid gap-1 flex-1">
+                                                <p className="font-semibold leading-none">
+                                                    {notification.title}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                                    {notification.body}
+                                                </p>
+                                                <div className="text-xs text-muted-foreground mt-1">
+                                                    <TimeAgo timestamp={notification.timestamp} />
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </Card>
+                                    </Link>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
+      </>
     );
 }
