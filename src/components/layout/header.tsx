@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -100,12 +101,12 @@ export function Header() {
     <>
       <Dialog open={isListingDialogOpen} onOpenChange={setIsListingDialogOpen}>
         <DialogContent className="p-0 flex flex-col h-full sm:h-auto sm:max-h-[90vh] sm:max-w-3xl">
-          <DialogHeader className="p-6 pb-4 shrink-0">
-            <DialogTitle className="text-2xl font-bold">Create a New Listing</DialogTitle>
-            <DialogDescription>
-              Select a category and fill in the details for your auction.
-            </DialogDescription>
-          </DialogHeader>
+          <div className="p-6 pb-0 shrink-0">
+            <DialogHeader>
+                <DialogTitle className="text-2xl font-bold">Create a New Listing</DialogTitle>
+                <DialogDescription className="pb-4">Select a category and fill in the details for your auction.</DialogDescription>
+            </DialogHeader>
+          </div>
           <div className="flex-1 min-h-0 px-6">
             <ScrollArea className="h-full w-full pr-6 -mr-6">
               <NewListingFlow onSuccess={() => setIsListingDialogOpen(false)} />
