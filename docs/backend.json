@@ -149,7 +149,7 @@
         },
         "isFlashAuction": {
           "type": "boolean",
-          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+          "description": "Indicates if the auction is a fast-paced AuctionPrime Flash auction."
         },
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": {
@@ -245,7 +245,7 @@
         },
         "isFlashAuction": {
           "type": "boolean",
-          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+          "description": "Indicates if the auction is a fast-paced AuctionPrime Flash auction."
         },
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": {
@@ -317,7 +317,7 @@
         "status": { "type": "string", "enum": ["upcoming", "live", "completed"] },
         "isFlashAuction": {
           "type": "boolean",
-          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+          "description": "Indicates if the auction is a fast-paced AuctionPrime Flash auction."
         },
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": { "type": "string" },
@@ -408,7 +408,7 @@
         },
         "isFlashAuction": {
           "type": "boolean",
-          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+          "description": "Indicates if the auction is a fast-paced AuctionPrime Flash auction."
         },
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": {
@@ -462,7 +462,7 @@
         "status": { "type": "string", "enum": ["upcoming", "live", "completed"] },
         "isFlashAuction": {
           "type": "boolean",
-          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+          "description": "Indicates if the auction is a fast-paced AuctionPrime Flash auction."
         },
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": { "type": "string" },
@@ -499,7 +499,7 @@
         "status": { "type": "string", "enum": ["upcoming", "live", "completed"] },
         "isFlashAuction": {
           "type": "boolean",
-          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+          "description": "Indicates if the auction is a fast-paced AuctionPrime Flash auction."
         },
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": { "type": "string" },
@@ -557,7 +557,7 @@
         "status": { "type": "string", "enum": ["upcoming", "live", "completed"] },
         "isFlashAuction": {
           "type": "boolean",
-          "description": "Indicates if the auction is a fast-paced Ubid Flash auction."
+          "description": "Indicates if the auction is a fast-paced AuctionPrime Flash auction."
         },
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": { "type": "string" },

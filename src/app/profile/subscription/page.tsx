@@ -191,7 +191,7 @@ export default function SubscriptionPage() {
         
         <Card className="border-2 border-sky-500 flex flex-col">
           <CardHeader>
-            <CardTitle>Ubid Plus</CardTitle>
+            <CardTitle>AuctionPrime Plus</CardTitle>
             <CardDescription>
               For serious sellers who want more.
             </CardDescription>
@@ -233,7 +233,7 @@ export default function SubscriptionPage() {
             <Badge className="bg-purple-500 text-white hover:bg-purple-500">Ultimate</Badge>
           </div>
           <CardHeader>
-            <CardTitle>Ultimate</CardTitle>
+            <CardTitle>AuctionPrime Ultimate</CardTitle>
             <CardDescription>For power users who want every advantage.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-grow">
@@ -271,3 +271,5 @@ export default function SubscriptionPage() {
     </div>
   );
 }
+
+    

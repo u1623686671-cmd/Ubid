@@ -56,7 +56,7 @@ export default function PrivacyPolicyPage() {
            <section className="space-y-4">
             <h2 className="text-2xl font-semibold font-headline text-foreground">5. Your Choices</h2>
             <p>
-              You may update, correct, or delete information about you at any time by logging into your account. If you wish to delete your account, please contact us at support@ubid.com, but note that we may retain certain information as required by law or for legitimate business purposes.
+              You may update, correct, or delete information about you at any time by logging into your account. If you wish to delete your account, please contact us at support@auctionprime.com, but note that we may retain certain information as required by law or for legitimate business purposes.
             </p>
           </section>
 
@@ -77,7 +77,7 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold font-headline text-foreground">8. Contact Us</h2>
             <p>
-              If you have any questions about this Privacy Policy, please contact us at support@ubid.com.
+              If you have any questions about this Privacy Policy, please contact us at support@auctionprime.com.
             </p>
           </section>
         </div>
@@ -85,3 +85,5 @@ export default function PrivacyPolicyPage() {
     </div>
   );
 }
+
+    

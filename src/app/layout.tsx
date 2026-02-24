@@ -1,3 +1,4 @@
+
 'use client'
 
 import { Toaster } from "@/components/ui/toaster";
@@ -47,7 +48,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Ubid - The Premier Auction Platform</title>
+        <title>AuctionPrime - The Premier Auction Platform</title>
         <meta name="description" content="A bidding platform for special and rare items." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -69,3 +70,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+    

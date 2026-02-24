@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -130,7 +131,7 @@ export default function SignupPage() {
           await processUserCreation(userCredential.user, values);
       }
 
-      toast({ variant: 'success', title: 'Sign Up Successful!', description: 'Welcome to Ubid.' });
+      toast({ variant: 'success', title: 'Sign Up Successful!', description: 'Welcome to AuctionPrime.' });
       router.replace('/home');
 
     } catch (error: any) {
@@ -286,3 +287,5 @@ export default function SignupPage() {
     </div>
   );
 }
+
+    

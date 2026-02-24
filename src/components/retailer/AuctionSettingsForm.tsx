@@ -107,7 +107,7 @@ export function AuctionSettingsForm({ form }: AuctionSettingsFormProps) {
                         <RadioGroupItem value="flash" id="flash-option" className="border-accent text-accent ring-offset-background focus-visible:ring-accent" />
                         <Label htmlFor="flash-option" className="flex items-center gap-1.5">
                             <Zap className="w-4 h-4" />
-                            Ubid Flash
+                            AuctionPrime Flash
                         </Label>
                         </div>
                     </RadioGroup>
@@ -246,3 +246,5 @@ export function AuctionSettingsForm({ form }: AuctionSettingsFormProps) {
         </>
     )
 }
+
+    

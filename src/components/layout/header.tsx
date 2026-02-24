@@ -119,7 +119,7 @@ export function Header() {
           {/* Desktop nav */}
           <div className="mr-6 hidden md:flex">
             <Link href="/home" className="mr-6 flex items-center space-x-2">
-              <span className="hidden font-extrabold tracking-tight sm:inline-block font-headline text-2xl text-primary">Ubid</span>
+              <span className="hidden font-extrabold tracking-tight sm:inline-block font-headline text-2xl text-primary">AuctionPrime</span>
             </Link>
             <nav className="flex items-center space-x-6 text-sm font-medium">
               {publicNavLinks.map((link) => (
@@ -150,7 +150,7 @@ export function Header() {
           {/* Mobile Logo */}
           <div className="flex items-center md:hidden">
                <Link href="/home" className="flex items-center space-x-2">
-                  <span className="font-extrabold tracking-tight font-headline text-2xl text-primary">Ubid</span>
+                  <span className="font-extrabold tracking-tight font-headline text-2xl text-primary">AuctionPrime</span>
                </Link>
           </div>
           
@@ -240,3 +240,5 @@ export function Header() {
     </>
   );
 }
+
+    

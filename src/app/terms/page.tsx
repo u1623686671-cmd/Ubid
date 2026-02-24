@@ -26,12 +26,12 @@ export default function TermsOfServicePage() {
 
         <div className="space-y-8 text-muted-foreground">
            <p>
-            These Terms and Conditions (“Terms”) govern your access to and use of UBID (the “Platform”, “Service”, “we”, “us”, or “our”). By accessing or using the Platform, you agree to be bound by these Terms. If you do not agree, you must not use the Platform.
+            These Terms and Conditions (“Terms”) govern your access to and use of AuctionPrime (the “Platform”, “Service”, “we”, “us”, or “our”). By accessing or using the Platform, you agree to be bound by these Terms. If you do not agree, you must not use the Platform.
           </p>
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold font-headline text-foreground">1. Nature of the Platform</h2>
             <p>
-              UBID is an online marketplace that enables users to list items for auction and submit bids. We do not sell, purchase, own, inspect, store, or deliver items listed on the Platform. We only provide a venue for users to connect. Transactions, communications, and agreements between buyers and sellers occur entirely at their own risk and responsibility.
+              AuctionPrime is an online marketplace that enables users to list items for auction and submit bids. We do not sell, purchase, own, inspect, store, or deliver items listed on the Platform. We only provide a venue for users to connect. Transactions, communications, and agreements between buyers and sellers occur entirely at their own risk and responsibility.
             </p>
           </section>
 
@@ -126,7 +126,7 @@ export default function TermsOfServicePage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold font-headline text-foreground">9. Limitation of Liability</h2>
             <p>
-              To the fullest extent permitted by law, UBID and its operators shall not be liable for:
+              To the fullest extent permitted by law, AuctionPrime and its operators shall not be liable for:
             </p>
              <ul className="list-disc list-inside space-y-2">
                 <li>failed transactions</li>
@@ -192,3 +192,5 @@ export default function TermsOfServicePage() {
     </div>
   );
 }
+
+    
