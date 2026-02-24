@@ -17,7 +17,6 @@ import { ScrollArea } from '../ui/scroll-area';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { usePathname } from 'next/navigation';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 type Notification = {
@@ -55,7 +54,6 @@ export function NotificationBell() {
     const firestore = useFirestore();
     const unreadCount = useUnreadNotificationsCount();
     const pathname = usePathname();
-    const isMobile = useIsMobile();
 
     const notificationsQuery = useMemoFirebase(() => {
         if (!user) return null;
@@ -86,14 +84,13 @@ export function NotificationBell() {
     return (
         <Popover onOpenChange={handleOpenChange}>
             <PopoverTrigger asChild>
-                 <Button 
-                  variant="outline" 
-                  size={isMobile ? "sm" : "icon"}
+                 <Button
+                  variant="outline"
+                  size="icon"
                   className={cn(
-                        "relative",
-                        isMobile 
-                            ? "text-primary border-primary font-bold hover:text-primary hover:bg-primary/10 p-2"
-                            : "rounded-full h-10 w-10 bg-card hover:bg-muted"
+                    "relative h-8 w-8 rounded-md p-0", // Mobile-first: same height and rounding as 'sm' button, but square.
+                    "text-primary border-primary font-bold hover:text-primary hover:bg-primary/10", // Mobile-first: color styles to match 'Add item'.
+                    "md:rounded-full md:h-10 md:w-10 md:bg-card md:hover:bg-muted md:border-border md:text-foreground md:font-normal" // Desktop overrides.
                   )}
                 >
                     <Bell className="h-5 w-5" />
