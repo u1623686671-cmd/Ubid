@@ -496,13 +496,13 @@ export default function HomePage() {
       </Dialog>
       <Dialog open={isListingDialogOpen} onOpenChange={setIsListingDialogOpen}>
         <DialogContent className="p-0 flex flex-col h-full sm:h-auto sm:max-h-[90vh] sm:max-w-3xl">
-            <DialogHeader className="p-6 pb-4 border-b shrink-0">
-                <DialogTitle className="text-2xl font-bold">Create a New Listing</DialogTitle>
-                <DialogDescription>Select a category and fill in the details for your auction.</DialogDescription>
-            </DialogHeader>
             <div className="flex-1 min-h-0">
                 <ScrollArea className="h-full w-full">
                     <div className="p-6">
+                        <DialogHeader className="pb-4">
+                            <DialogTitle className="text-2xl font-bold">Create a New Listing</DialogTitle>
+                            <DialogDescription>Select a category and fill in the details for your auction.</DialogDescription>
+                        </DialogHeader>
                         <NewListingFlow onSuccess={() => setIsListingDialogOpen(false)} />
                     </div>
                 </ScrollArea>
@@ -641,5 +641,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    
