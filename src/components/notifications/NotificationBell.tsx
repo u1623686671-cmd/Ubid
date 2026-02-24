@@ -17,6 +17,8 @@ import { ScrollArea } from '../ui/scroll-area';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
 import { usePathname } from 'next/navigation';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 type Notification = {
     id: string;
@@ -53,6 +55,7 @@ export function NotificationBell() {
     const firestore = useFirestore();
     const unreadCount = useUnreadNotificationsCount();
     const pathname = usePathname();
+    const isMobile = useIsMobile();
 
     const notificationsQuery = useMemoFirebase(() => {
         if (!user) return null;
@@ -83,10 +86,19 @@ export function NotificationBell() {
     return (
         <Popover onOpenChange={handleOpenChange}>
             <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="relative rounded-full h-10 w-10 bg-card hover:bg-muted">
+                 <Button 
+                  variant="outline" 
+                  size={isMobile ? "sm" : "icon"}
+                  className={cn(
+                        "relative",
+                        isMobile 
+                            ? "text-primary border-primary font-bold hover:text-primary hover:bg-primary/10 p-2"
+                            : "rounded-full h-10 w-10 bg-card hover:bg-muted"
+                  )}
+                >
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
-                         <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+                         <span className="absolute -top-1 -right-1 flex h-4 w-4 transform items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
                             {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                     )}
