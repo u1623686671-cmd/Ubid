@@ -454,7 +454,7 @@ export default function HomePage() {
                     
                         <CardFooter className="p-4 flex flex-col sm:flex-row sm:justify-end gap-2">
                             <Button
-                                onClick={(e) => { e.stopPropagation(); handleItemSelect({ id: item.id, category: collectionName })}}
+                                onClick={(e) => { e.stopPropagation(); handleItemSelect({ id: item.id, category: item.category })}}
                                 size="sm"
                                 variant="outline"
                                 className="w-full sm:w-auto"
@@ -640,3 +640,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    

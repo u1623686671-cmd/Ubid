@@ -8,16 +8,14 @@ import { redirect } from 'next/navigation';
 import Stripe from 'stripe';
 
 type Plan = 'plus' | 'ultimate' | 'free';
-type BillingCycle = 'monthly' | 'yearly';
+type BillingCycle = 'monthly';
 
 const SUBSCRIPTION_PRICE_IDS: Record<Exclude<Plan, 'free'>, Record<BillingCycle, string>> = {
     plus: {
         monthly: process.env.STRIPE_PLUS_MONTHLY_ID!,
-        yearly: process.env.STRIPE_PLUS_YEARLY_ID!,
     },
     ultimate: {
         monthly: process.env.STRIPE_ULTIMATE_MONTHLY_ID!,
-        yearly: process.env.STRIPE_ULTIMATE_YEARLY_ID!,
     },
 };
 
@@ -158,3 +156,5 @@ export async function createCustomerPortalSession(userId: string, email: string)
         throw new Error("Could not create Stripe customer portal session.");
     }
 }
+
+    

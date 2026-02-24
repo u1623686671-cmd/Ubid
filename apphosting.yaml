@@ -21,3 +21,5 @@ env:
     value: "price_1T4OIbK0UI9TeZnHOJNK9x9j"
   - variable: STRIPE_BOOST_PRICE_ID
     value: "price_1T4OJ7K0UI9TeZnHPKuFevmG"
+
+    
