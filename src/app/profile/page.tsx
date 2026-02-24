@@ -239,12 +239,14 @@ export default function ProfilePage() {
                         <div className="flex items-center -mt-12 justify-center">
                             <div className="w-1/3 flex justify-center">
                                 {isMobile && (userProfile?.isUltimateUser || userProfile?.isPlusUser) && (
-                                    <div>
-                                        {userProfile.isUltimateUser ? (
-                                            <Badge className="bg-purple-500 text-white hover:bg-purple-500 border-2 border-background">ULTIMATE</Badge>
-                                        ) : userProfile.isPlusUser ? (
-                                            <Badge className="bg-sky-500 text-white hover:bg-sky-500 border-2 border-background">PLUS</Badge>
-                                        ) : null}
+                                    <div className="relative w-full h-full flex items-center justify-center">
+                                        <div className="absolute">
+                                            {userProfile.isUltimateUser ? (
+                                                <Badge className="bg-purple-500 text-white hover:bg-purple-500 border-2 border-background">ULTIMATE</Badge>
+                                            ) : userProfile.isPlusUser ? (
+                                                <Badge className="bg-sky-500 text-white hover:bg-sky-500 border-2 border-background">PLUS</Badge>
+                                            ) : null}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -275,8 +277,10 @@ export default function ProfilePage() {
                             </div>
                             <div className="w-1/3 flex justify-center">
                                 {isMobile && (
-                                    <div>
-                                        <NotificationBell />
+                                    <div className="relative w-full h-full flex items-center justify-center">
+                                        <div className="absolute">
+                                            
+                                        </div>
                                     </div>
                                 )}
                             </div>

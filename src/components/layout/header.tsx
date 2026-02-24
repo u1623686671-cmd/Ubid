@@ -172,7 +172,6 @@ export function Header() {
                           <Plus className="h-4 w-4" />
                           Add item
                       </Button>
-                      <NotificationBell />
                     </>
                   )}
                 </div>
