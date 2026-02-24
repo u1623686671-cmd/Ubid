@@ -57,6 +57,27 @@ service cloud.firestore {
              request.resource.data.viewCount == resource.data.get('viewCount', 0) + 1 &&
              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
     }
+    
+    function isManagingSecondChanceOffer() {
+      // The item owner can create/update the offer object if there's no winner yet.
+      let isOwnerAction = isOwner(resource.data.userId) &&
+                          resource.data.winnerId == null &&
+                          'secondChanceOffer' in request.resource.data.diff(resource.data).affectedKeys();
+
+      // The recipient can accept or decline the offer.
+      let isRecipientAction = isSignedIn() &&
+                              'secondChanceOffer' in resource.data &&
+                              request.auth.uid == resource.data.secondChanceOffer.recipientId &&
+                              request.resource.data.secondChanceOffer.status != resource.data.secondChanceOffer.status;
+
+      // If accepting, the winnerId must also be set.
+      let isAcceptingCorrectly = !isRecipientAction ||
+                                 request.resource.data.secondChanceOffer.status != 'accepted' ||
+                                 (request.resource.data.winnerId == request.auth.uid &&
+                                  request.resource.data.diff(resource.data).affectedKeys().hasAll(['winnerId', 'secondChanceOffer']));
+
+      return isOwnerAction || (isRecipientAction && isAcceptingCorrectly);
+    }
 
     // Collection Group Rules
     match /{path=**}/bids/{bidId} {
@@ -154,7 +175,7 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
 
       // The owner or an admin can update/delete. Bidders can update bid fields.
-      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount();
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount() || isManagingSecondChanceOffer();
       allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
 
       match /watchers/{userId} {
@@ -172,7 +193,7 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
 
       // The owner or an admin can update/delete. Bidders can update bid fields.
-      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount();
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount() || isManagingSecondChanceOffer();
       allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
       
       match /watchers/{userId} {
@@ -190,7 +211,7 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
 
       // The owner or an admin can update/delete. Bidders can update bid fields.
-      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount();
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount() || isManagingSecondChanceOffer();
       allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
       
       match /watchers/{userId} {
@@ -208,7 +229,7 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
 
       // The owner or an admin can update/delete. Bidders can update bid fields.
-      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount();
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount() || isManagingSecondChanceOffer();
       allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
       
       match /watchers/{userId} {
@@ -226,7 +247,7 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
 
       // The owner or an admin can update/delete. Bidders can update bid fields.
-      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount();
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount() || isManagingSecondChanceOffer();
       allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
       
       match /watchers/{userId} {
@@ -244,7 +265,7 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
 
       // The owner or an admin can update/delete. Bidders can update bid fields.
-      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount();
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount() || isManagingSecondChanceOffer();
       allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
       
       match /watchers/{userId} {
@@ -262,7 +283,7 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
 
       // The owner or an admin can update/delete. Bidders can update bid fields.
-      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount();
+      allow update: if isAdmin() || isBidderUpdatingBidFields() || isExtendingAuction() || isBoostingListing() || isUpdatingViewCount() || isManagingSecondChanceOffer();
       allow delete: if (isSignedIn() && isOwner(resource.data.userId)) || isAdmin();
       
       match /watchers/{userId} {
@@ -323,3 +344,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

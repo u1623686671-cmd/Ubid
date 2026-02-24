@@ -157,7 +157,17 @@
           "description": "The UID of the winning bidder after the auction is completed."
         },
         "extendCount": { "type": "number", "description": "How many times the auction has been extended." },
-        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." }
+        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." },
+        "secondChanceOffer": {
+          "type": "object",
+          "description": "Details of a second-chance offer made to the runner-up bidder.",
+          "properties": {
+            "recipientId": { "type": "string", "description": "The UID of the user receiving the offer." },
+            "offerPrice": { "type": "number", "description": "The price offered to the second bidder (their highest bid)." },
+            "status": { "type": "string", "enum": ["pending", "accepted", "declined", "expired"], "description": "The current status of the offer." },
+            "expiryDate": { "type": "string", "format": "date-time", "description": "When the second-chance offer expires." }
+          }
+        }
       },
       "required": [
         "userId",
@@ -243,7 +253,17 @@
           "description": "The UID of the winning bidder after the auction is completed."
         },
         "extendCount": { "type": "number", "description": "How many times the auction has been extended." },
-        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." }
+        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." },
+        "secondChanceOffer": {
+          "type": "object",
+          "description": "Details of a second-chance offer made to the runner-up bidder.",
+          "properties": {
+            "recipientId": { "type": "string", "description": "The UID of the user receiving the offer." },
+            "offerPrice": { "type": "number", "description": "The price offered to the second bidder (their highest bid)." },
+            "status": { "type": "string", "enum": ["pending", "accepted", "declined", "expired"], "description": "The current status of the offer." },
+            "expiryDate": { "type": "string", "format": "date-time", "description": "When the second-chance offer expires." }
+          }
+        }
       },
       "required": [
         "userId",
@@ -302,7 +322,17 @@
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": { "type": "string" },
         "extendCount": { "type": "number", "description": "How many times the auction has been extended." },
-        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." }
+        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." },
+        "secondChanceOffer": {
+          "type": "object",
+          "description": "Details of a second-chance offer made to the runner-up bidder.",
+          "properties": {
+            "recipientId": { "type": "string", "description": "The UID of the user receiving the offer." },
+            "offerPrice": { "type": "number", "description": "The price offered to the second bidder (their highest bid)." },
+            "status": { "type": "string", "enum": ["pending", "accepted", "declined", "expired"], "description": "The current status of the offer." },
+            "expiryDate": { "type": "string", "format": "date-time", "description": "When the second-chance offer expires." }
+          }
+        }
       },
       "required": [
         "userId",
@@ -386,7 +416,17 @@
           "description": "The UID of the winning bidder after the auction is completed."
         },
         "extendCount": { "type": "number", "description": "How many times the auction has been extended." },
-        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." }
+        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." },
+        "secondChanceOffer": {
+          "type": "object",
+          "description": "Details of a second-chance offer made to the runner-up bidder.",
+          "properties": {
+            "recipientId": { "type": "string", "description": "The UID of the user receiving the offer." },
+            "offerPrice": { "type": "number", "description": "The price offered to the second bidder (their highest bid)." },
+            "status": { "type": "string", "enum": ["pending", "accepted", "declined", "expired"], "description": "The current status of the offer." },
+            "expiryDate": { "type": "string", "format": "date-time", "description": "When the second-chance offer expires." }
+          }
+        }
       },
       "required": [
         "userId",
@@ -427,7 +467,17 @@
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": { "type": "string" },
         "extendCount": { "type": "number", "description": "How many times the auction has been extended." },
-        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." }
+        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." },
+        "secondChanceOffer": {
+          "type": "object",
+          "description": "Details of a second-chance offer made to the runner-up bidder.",
+          "properties": {
+            "recipientId": { "type": "string", "description": "The UID of the user receiving the offer." },
+            "offerPrice": { "type": "number", "description": "The price offered to the second bidder (their highest bid)." },
+            "status": { "type": "string", "enum": ["pending", "accepted", "declined", "expired"], "description": "The current status of the offer." },
+            "expiryDate": { "type": "string", "format": "date-time", "description": "When the second-chance offer expires." }
+          }
+        }
       },
       "required": ["userId", "itemName", "category", "startingBid", "currentBid", "bidCount", "minimumBidIncrement", "auctionStartDate", "auctionEndDate", "status"]
     },
@@ -454,7 +504,17 @@
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": { "type": "string" },
         "extendCount": { "type": "number", "description": "How many times the auction has been extended." },
-        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." }
+        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." },
+        "secondChanceOffer": {
+          "type": "object",
+          "description": "Details of a second-chance offer made to the runner-up bidder.",
+          "properties": {
+            "recipientId": { "type": "string", "description": "The UID of the user receiving the offer." },
+            "offerPrice": { "type": "number", "description": "The price offered to the second bidder (their highest bid)." },
+            "status": { "type": "string", "enum": ["pending", "accepted", "declined", "expired"], "description": "The current status of the offer." },
+            "expiryDate": { "type": "string", "format": "date-time", "description": "When the second-chance offer expires." }
+          }
+        }
       },
       "required": ["userId", "itemName", "category", "startingBid", "currentBid", "bidCount", "minimumBidIncrement", "auctionStartDate", "auctionEndDate", "status"]
     },
@@ -502,7 +562,17 @@
         "isPromoted": { "type": "boolean", "description": "Indicates if the auction listing is promoted by the seller." },
         "winnerId": { "type": "string" },
         "extendCount": { "type": "number", "description": "How many times the auction has been extended." },
-        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." }
+        "viewCount": { "type": "number", "description": "The total number of times the listing has been viewed." },
+        "secondChanceOffer": {
+          "type": "object",
+          "description": "Details of a second-chance offer made to the runner-up bidder.",
+          "properties": {
+            "recipientId": { "type": "string", "description": "The UID of the user receiving the offer." },
+            "offerPrice": { "type": "number", "description": "The price offered to the second bidder (their highest bid)." },
+            "status": { "type": "string", "enum": ["pending", "accepted", "declined", "expired"], "description": "The current status of the offer." },
+            "expiryDate": { "type": "string", "format": "date-time", "description": "When the second-chance offer expires." }
+          }
+        }
       },
       "required": [
         "userId",
@@ -807,3 +877,5 @@
     }
   }
 }
+
+    

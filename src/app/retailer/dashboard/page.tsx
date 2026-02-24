@@ -5,8 +5,8 @@
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { doc, collection, query, where, deleteDoc, runTransaction, getDoc, updateDoc } from "firebase/firestore";
-import { Loader2, Plus, Package, MessageSquare, Trash2, Search, Gem, Palette, CreditCard, Phone, ArrowLeft, Shirt, X, Clock, Coins, LogIn, Info, Zap, ChevronRight } from "lucide-react";
+import { doc, collection, query, where, deleteDoc, runTransaction, getDoc, updateDoc, orderBy, limit, getDocs } from "firebase/firestore";
+import { Loader2, Plus, Package, MessageSquare, Trash2, Search, Gem, Palette, CreditCard, Phone, ArrowLeft, Shirt, X, Clock, Coins, LogIn, Info, Zap, ChevronRight, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { format, addHours } from "date-fns";
+import { format, addHours, addDays, isPast } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { ChatWithWinnerButton } from "@/components/retailer/chat-with-winner-button";
@@ -53,6 +53,13 @@ type BaseListing = {
     isFlashAuction?: boolean;
     extendCount?: number;
     isPromoted?: boolean;
+    winnerId?: string;
+    secondChanceOffer?: {
+        recipientId: string;
+        offerPrice: number;
+        status: 'pending' | 'accepted' | 'declined' | 'expired';
+        expiryDate: string;
+    };
 };
 
 type AlcoholListingData = { name: string };
@@ -86,6 +93,7 @@ export default function MyListingsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [extendingItemId, setExtendingItemId] = useState<string | null>(null);
     const [boostingItemId, setBoostingItemId] = useState<string | null>(null);
+    const [offeringSecondChance, setOfferingSecondChance] = useState<string | null>(null);
 
     const userProfileRef = useMemoFirebase(() => user ? doc(firestore, 'users', user.uid) : null, [firestore, user]);
     const { data: userProfile, isLoading: isUserProfileLoading } = useDoc(userProfileRef);
@@ -295,6 +303,45 @@ export default function MyListingsPage() {
             setBoostingItemId(null);
         }
     };
+    
+    const handleSecondChanceOffer = async (listing: AnyListing) => {
+        if (!firestore) return;
+        setOfferingSecondChance(listing.id);
+    
+        try {
+            const bidsRef = collection(firestore, listing.category, listing.id, 'bids');
+            const bidsQuery = query(bidsRef, orderBy('amount', 'desc'), limit(2));
+            const bidsSnapshot = await getDocs(bidsQuery);
+    
+            if (bidsSnapshot.docs.length < 2) {
+                throw new Error("Not enough bidders to make a second-chance offer.");
+            }
+    
+            const secondBidderDoc = bidsSnapshot.docs[1];
+            const secondBidderData = secondBidderDoc.data();
+    
+            const offer = {
+                recipientId: secondBidderData.userId,
+                offerPrice: secondBidderData.amount,
+                status: 'pending',
+                expiryDate: addDays(new Date(), 2).toISOString(), // 48-hour expiry
+            };
+    
+            const itemRef = doc(firestore, listing.category, listing.id);
+            await updateDoc(itemRef, { secondChanceOffer: offer });
+    
+            toast({
+                variant: 'success',
+                title: "Second-Chance Offer Sent!",
+                description: `An offer has been sent to ${secondBidderData.bidderName.split(' ')[0]}.`,
+            });
+    
+        } catch (e: any) {
+            toast({ variant: 'destructive', title: "Offer Failed", description: e.message });
+        } finally {
+            setOfferingSecondChance(null);
+        }
+    };
 
 
     const filterListings = (listings: AnyListing[], search: string) => 
@@ -356,6 +403,11 @@ export default function MyListingsPage() {
                     const isBoosting = boostingItemId === listing.id;
                     const hasFreePromotion = (userProfile?.isPlusUser || userProfile?.isUltimateUser) && (userProfile?.promotionTokens || 0) > 0;
                     const promoTokensLeft = userProfile?.promotionTokens || 0;
+                    const isOffering = offeringSecondChance === listing.id;
+
+                    const canMakeOffer = listing.status === 'completed' && !listing.winnerId;
+                    const offerStatus = listing.secondChanceOffer?.status;
+                    const offerExpired = listing.secondChanceOffer?.expiryDate ? isPast(new Date(listing.secondChanceOffer.expiryDate)) : false;
 
                     return (
                         <Card key={listing.id}>
@@ -457,12 +509,26 @@ export default function MyListingsPage() {
                                         </div>
                                     )}
                                     {listing.status === 'completed' && (
-                                        <div className="flex gap-2">
-                                            <div className="flex-1">
+                                        <div className="flex flex-col gap-2">
+                                            {listing.winnerId ? (
                                                 <ChatWithWinnerButton itemId={listing.id} itemCategory={listing.category} />
-                                            </div>
-                                            <Button onClick={() => handleItemSelect({ id: listing.id, category: listing.category })} variant="secondary" size="sm" className="flex-1">
-                                                <LogIn className="h-4 w-4"/> View
+                                            ) : canMakeOffer ? (
+                                                <>
+                                                    <div className="text-center text-xs text-muted-foreground">
+                                                        {offerStatus === 'pending' && !offerExpired && "Offer is pending with the second bidder."}
+                                                        {(offerStatus === 'declined' || offerExpired) && "Second-chance offer was not accepted."}
+                                                        {!offerStatus && "The winner did not complete the transaction."}
+                                                    </div>
+                                                    <Button onClick={() => handleSecondChanceOffer(listing)} size="sm" variant="outline" disabled={isOffering}>
+                                                        {isOffering ? <Loader2 className="h-4 w-4 animate-spin" /> : <History className="h-4 w-4" />}
+                                                        Offer to 2nd Bidder
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                <p className="text-center text-sm text-muted-foreground">This auction ended without a winning bid.</p>
+                                            )}
+                                            <Button onClick={() => handleItemSelect({ id: listing.id, category: listing.category })} variant="secondary" size="sm" className="w-full">
+                                                <LogIn className="h-4 w-4"/> View Details
                                             </Button>
                                         </div>
                                     )}
@@ -610,3 +676,5 @@ export default function MyListingsPage() {
         </>
     )
 }
+
+    

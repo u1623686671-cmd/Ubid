@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from "@/firebase";
-import { collection, query, orderBy, getDocs, where, addDoc, serverTimestamp, getDoc, setDoc, doc } from "firebase/firestore";
+import { collection, query, orderBy, getDocs, where, addDoc, serverTimestamp, getDoc, setDoc, doc, runTransaction, updateDoc } from "firebase/firestore";
 import { isPast } from "date-fns";
 import { useRouter } from "next/navigation";
 
@@ -13,14 +13,14 @@ import type { MyBidItem } from "@/app/my-bids/page";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Loader2, TrendingUp, TrendingDown, Award, CircleHelp, LogIn } from "lucide-react";
+import { MessageSquare, Loader2, TrendingUp, TrendingDown, Award, CircleHelp, LogIn, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { AuctionTimerBar } from "@/components/auctions/AuctionTimerBar";
 import { LebanesePlateDisplay } from "../auctions/lebanese-plate-display";
 import { PhoneNumberDisplay } from "../auctions/phone-number-display";
 
-export type BidStatus = 'Winning' | 'Outbid' | 'Won' | 'Lost' | 'Ended' | 'Loading' | 'Deleted';
+export type BidStatus = 'Winning' | 'Outbid' | 'Won' | 'Lost' | 'Ended' | 'Loading' | 'Deleted' | 'Offer Received';
 
 type MyBidItemCardProps = {
     item: MyBidItem;
@@ -42,6 +42,12 @@ type LiveItemData = {
     winnerId?: string;
     highestBidderId?: string;
     isPromoted?: boolean;
+    secondChanceOffer?: {
+        recipientId: string;
+        offerPrice: number;
+        status: 'pending' | 'accepted' | 'declined' | 'expired';
+        expiryDate: string;
+    };
 }
 
 async function getOrCreateChat(
@@ -132,6 +138,7 @@ const StatusDisplay = ({ status }: { status: BidStatus }) => {
         'Won': { icon: Award, text: 'You Won!', color: 'text-amber-500' },
         'Lost': { icon: CircleHelp, text: 'Lost', color: 'text-muted-foreground' },
         'Ended': { icon: CircleHelp, text: 'Ended', color: 'text-muted-foreground' },
+        'Offer Received': { icon: Award, text: 'Offer Received', color: 'text-blue-500' },
         'Loading': { icon: Loader2, text: 'Loading...', color: 'text-muted-foreground' }
     }[status];
 
@@ -155,6 +162,7 @@ export function MyBidItemCard({ item, onStatusUpdate, onItemSelect, className }:
     const { toast } = useToast();
     const [isCreatingChat, setIsCreatingChat] = useState(false);
     const [status, setStatus] = useState<BidStatus>('Loading');
+    const [isRespondingToOffer, setIsRespondingToOffer] = useState(false);
 
 
     const isValidCategory = validCategories.includes(item.category);
@@ -188,6 +196,21 @@ export function MyBidItemCard({ item, onStatusUpdate, onItemSelect, className }:
             onStatusUpdate(item.id, 'Deleted');
             setStatus('Deleted');
             return;
+        }
+        
+        const offer = liveItemData.secondChanceOffer;
+        const isOfferRecipient = offer?.status === 'pending' && offer?.recipientId === user.uid;
+
+        if (isOfferRecipient) {
+             const offerExpiry = new Date(offer.expiryDate);
+             if (isPast(offerExpiry)) {
+                 onStatusUpdate(item.id, 'Ended');
+                 setStatus('Ended');
+                 return;
+             }
+             onStatusUpdate(item.id, 'Offer Received');
+             setStatus('Offer Received');
+             return;
         }
 
         const auctionEndDate = new Date(item.itemAuctionEndDate);
@@ -250,6 +273,39 @@ export function MyBidItemCard({ item, onStatusUpdate, onItemSelect, className }:
         }
     };
     
+    const handleAcceptOffer = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!firestore || !user || !itemRef) return;
+        setIsRespondingToOffer(true);
+        try {
+            await runTransaction(firestore, async (transaction) => {
+                transaction.update(itemRef, {
+                    'secondChanceOffer.status': 'accepted',
+                    winnerId: user.uid
+                });
+            });
+            toast({ variant: 'success', title: "Offer Accepted!", description: `Congratulations, you've won ${item.itemTitle}!` });
+        } catch (e: any) {
+            toast({ variant: 'destructive', title: 'Action Failed', description: 'Could not accept the offer. Please try again.' });
+        } finally {
+            setIsRespondingToOffer(false);
+        }
+    }
+    
+    const handleDeclineOffer = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!firestore || !itemRef) return;
+        setIsRespondingToOffer(true);
+        try {
+            await updateDoc(itemRef, { 'secondChanceOffer.status': 'declined' });
+            toast({ title: "Offer Declined", description: "You have declined the second-chance offer." });
+        } catch (e: any) {
+            toast({ variant: 'destructive', title: 'Action Failed', description: 'Could not decline the offer. Please try again.' });
+        } finally {
+            setIsRespondingToOffer(false);
+        }
+    }
+    
     if (!isValidCategory) {
         return null;
     }
@@ -283,10 +339,13 @@ export function MyBidItemCard({ item, onStatusUpdate, onItemSelect, className }:
             </Card>
         );
     }
+    
+    const isOfferRecipient = currentStatus === 'Offer Received' && liveItemData?.secondChanceOffer;
 
     return (
         <Card onClick={onItemSelect} className={cn(
-            "shadow-lg bg-card cursor-pointer overflow-hidden",
+            "shadow-lg bg-card cursor-pointer overflow-hidden transition-all",
+            isOfferRecipient ? 'border-2 border-blue-500' : '',
             className
         )}>
             <CardContent className="p-4 pb-0">
@@ -343,7 +402,22 @@ export function MyBidItemCard({ item, onStatusUpdate, onItemSelect, className }:
                 </div>
             </CardContent>
 
-             <CardFooter className="p-4 flex flex-col sm:flex-row sm:justify-end gap-2">
+             <CardFooter className="p-4 flex flex-col gap-2">
+                {isOfferRecipient && (
+                    <div className="w-full p-3 rounded-md bg-blue-500/10 border border-blue-500/20 text-center space-y-3">
+                        <p className="font-semibold text-blue-700">You have a second-chance offer to buy this for ${liveItemData.secondChanceOffer.offerPrice.toLocaleString()}!</p>
+                        <div className="flex gap-2 justify-center">
+                            <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleAcceptOffer} disabled={isRespondingToOffer}>
+                                {isRespondingToOffer ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4"/>}
+                                Accept
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={handleDeclineOffer} disabled={isRespondingToOffer}>
+                                {isRespondingToOffer ? <Loader2 className="h-4 w-4 animate-spin"/> : <X className="h-4 w-4"/>}
+                                Decline
+                            </Button>
+                        </div>
+                    </div>
+                )}
                 {currentStatus === 'Won' && (
                    <Button onClick={handleChatClick} disabled={isCreatingChat} size="sm" className="w-full sm:w-auto">
                        {isCreatingChat ? (
